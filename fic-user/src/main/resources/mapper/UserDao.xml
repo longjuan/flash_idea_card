@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.user.dao.UserDao">
+
+    <insert id="insertUser" parameterType="top.zway.fic.base.entity.doo.UserDO" useGeneratedKeys="true" keyProperty="userDO.id">
+        INSERT INTO `user` ( `username`, `password`, `status` )
+        VALUES (#{userDO.username},#{userDO.password},#{userDO.status})
+    </insert>
+    <update id="updatePassword">
+        UPDATE `user`
+        SET `password` = #{password}
+        WHERE
+            id = #{id}
+    </update>
+    <select id="countUsername" resultType="java.lang.Integer">
+        SELECT
+            COUNT( `username` )
+        FROM
+            `user`
+        WHERE
+            username = #{username}
+    </select>
+    <select id="getUserDoById" resultType="top.zway.fic.base.entity.doo.UserDO">
+        SELECT
+            id,
+            `username`,
+            `password`,
+            `status`
+        FROM
+            `user`
+        WHERE
+            id = #{id}
+    </select>
+</mapper>

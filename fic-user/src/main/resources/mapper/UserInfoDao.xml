@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.user.dao.UserInfoDao">
+
+    <insert id="insertUserInfo">
+        INSERT INTO user_info ( userid, nickname, avatar )
+        VALUES (#{userInfoDo.userid},#{userInfoDo.nickname},#{userInfoDo.avatar})
+    </insert>
+    <update id="updateNickname">
+        UPDATE user_info
+        SET nickname = #{nickname}
+        WHERE
+            userid = #{userid}
+    </update>
+    <update id="updateAvatar">
+        UPDATE user_info
+        SET avatar = #{avatar}
+        WHERE
+            userid = #{userid}
+    </update>
+    <select id="getUserInfoDo" resultType="top.zway.fic.base.entity.doo.UserInfoDO">
+        SELECT
+            userid,
+            nickname,
+            avatar
+        FROM
+            user_info
+        WHERE
+            userid = #{userid}
+    </select>
+</mapper>

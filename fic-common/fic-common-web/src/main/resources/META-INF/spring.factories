@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  top.zway.fic.web.config.FeignConfig,\
+  top.zway.fic.web.exception.GlobalExceptionHandler,\
+  top.zway.fic.web.holder.LoginUserHolder,\
+  top.zway.fic.web.config.SwaggerConfig

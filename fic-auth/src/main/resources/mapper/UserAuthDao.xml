@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.auth.dao.UserAuthDao">
+    <resultMap id="userDto" type="top.zway.fic.base.entity.dto.UserDTO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <collection property="roles" ofType="string">
+            <result column="role" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+    <select id="listUserDtoByUsername" resultMap="userDto">
+        SELECT
+            u.id,
+            u.`username`,
+            u.`password`,
+            u.`status`,
+            r.role
+        FROM
+            `user` AS u,
+            `user_role` AS r
+        WHERE
+            u.username = #{username}
+          AND u.id = r.userid
+    </select>
+    <select id="listResourceRole" resultType="top.zway.fic.base.entity.doo.ResourceRoleDO">
+        SELECT
+            `role`,
+            resource_url
+        FROM
+            role_resource
+    </select>
+</mapper>

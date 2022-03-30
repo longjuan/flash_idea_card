@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  top.zway.fic.redis.config.RedisConfig,\
+  top.zway.fic.redis.util.RedisUtils

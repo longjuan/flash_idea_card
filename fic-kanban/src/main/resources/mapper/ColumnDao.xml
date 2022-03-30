@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.kanban.dao.ColumnDao">
+    <sql id="Base_Column_List">
+        column_id, column_order, column_title, kanban_id, update_user, create_time, update_time
+    </sql>
+    <insert id="insert" parameterType="top.zway.fic.base.entity.doo.KanbanColumnDO" useGeneratedKeys="true"
+            keyColumn="column_id" keyProperty="columnId">
+        insert into kanban_column (column_order, column_title, kanban_id, update_user )
+        values ( #{columnOrder}, #{columnTitle}, #{kanbanId}, #{updateUser} )
+    </insert>
+    <update id="updateBaseInfo">
+        update kanban_column
+        set column_title = #{columnTitle},
+            update_user = #{updateUser},
+            update_time = CURRENT_TIMESTAMP
+        where column_id = #{columnId}
+    </update>
+    <update id="setOrder">
+        update kanban_column
+        set column_order = #{order}
+        where column_id = #{columnId}
+    </update>
+    <delete id="delete">
+        delete from kanban_column
+        where column_id = #{columnId}
+    </delete>
+    <delete id="deleteByKanbanId">
+        delete from kanban_column
+        where kanban_id = #{kanbanId}
+    </delete>
+    <select id="getLastOrder" resultType="java.lang.Double">
+        SELECT
+            max( column_order )
+        FROM
+            kanban_column
+        WHERE
+            kanban_id = #{kanbanId}
+    </select>
+    <select id="getKanbanIdByColumnId" resultType="java.lang.Long">
+        SELECT
+            kanban_id
+        FROM
+            kanban_column
+        WHERE
+            column_id = #{columnId}
+    </select>
+    <select id="getSortedOrderAfterOrBefore" resultType="java.lang.Double">
+        SELECT
+        column_order
+        FROM
+        kanban_column
+        WHERE
+        kanban_id = #{kanbanId}
+        AND column_order
+        <if test="down">
+            &gt;=
+        </if>
+        <if test="!down">
+            &lt;=
+        </if>
+        ( SELECT column_order FROM kanban_column WHERE column_id = #{columnId} )
+        ORDER BY
+        column_order
+        <if test="down">
+            ASC
+        </if>
+        <if test="!down">
+            DESC
+        </if>
+        LIMIT 0,#{getSize}
+    </select>
+
+    <select id="selectByPrimaryKey" resultType="top.zway.fic.base.entity.doo.KanbanColumnDO">
+        select
+        <include refid="Base_Column_List" />
+        from kanban_column
+        where column_id = #{columnId}
+    </select>
+
+    <select id="selectByKanbanId" resultType="top.zway.fic.base.entity.doo.KanbanColumnDO">
+        select
+        <include refid="Base_Column_List" />
+        from kanban_column
+        where kanban_id = #{kanbanId}
+    </select>
+</mapper>
