@@ -16,14 +16,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CardVO extends CardDO {
-    private Integer realCardOrder;
 
     private List<TagDO> tags;
 
-    public CardVO(CardDO cardDO, Integer realCardOrder, List<TagDO> tags) {
+    public CardVO(CardDO cardDO, List<TagDO> tags) {
         super(cardDO.getCardId(), cardDO.getOrderInColumn(), cardDO.getUpdateTime(), cardDO.getColumnId(),
                 cardDO.getKanbanId(), cardDO.getContent(), cardDO.getTagged(), cardDO.getUpdateUser(), cardDO.getCreateTime());
-        this.realCardOrder = realCardOrder;
         this.tags = tags;
     }
 }

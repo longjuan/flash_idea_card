@@ -136,21 +136,22 @@ public class KanbanServiceImpl implements KanbanService {
         List<KanbanColumnDO> kanbanColumnDoS = columnDao.selectByKanbanId(kanbanId);
         for (KanbanColumnDO kanbanColumnDo : kanbanColumnDoS) {
             List<CardDO> cardDoS = cardDao.selectByColumnIdOrdered(kanbanColumnDo.getColumnId());
-            int cOder = 1;
+            cardDoS.sort(Comparator.comparingDouble(CardDO::getOrderInColumn));
             List<CardVO> cardVOList = new ArrayList<>(cardDoS.size());
             for (CardDO cardDo : cardDoS) {
                 // 构造card vo
                 List<TagDO> tagDoS = null;
                 if (cardDo.getTagged()) {
                     tagDoS = tagDao.selectByCardId(cardDo.getCardId());
-                }else {
+                } else {
                     tagDoS = new ArrayList<>(0);
                 }
-                cardVOList.add(new CardVO(cardDo, cOder++, tagDoS));
+                cardVOList.add(new CardVO(cardDo, tagDoS));
             }
-            ColumnVO e = new ColumnVO(kanbanColumnDo,cardVOList);
+            ColumnVO e = new ColumnVO(kanbanColumnDo, cardVOList);
             columns.add(e);
         }
+        columns.sort(Comparator.comparingDouble(ColumnVO::getColumnOrder));
         ret.setColumns(columns);
         return ret;
     }
