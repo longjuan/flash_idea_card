@@ -119,8 +119,8 @@ public class KanbanServiceImpl implements KanbanService {
     @Override
     public KanbanContentVO getKanbanContent(Long userId, Long kanbanId) {
         // 鉴权
-        KanbanDO role = kanbanDao.selectByPrimaryKey(kanbanId);
-        if (role == null || role.getOwnerId().longValue() != userId.longValue()) {
+        ShareKanbanDO shareKanbanDO = shareKanbanDao.selectByKanbanIdAndUserId(kanbanId, userId);
+        if (shareKanbanDO == null) {
             return null;
         }
         KanbanContentVO ret = new KanbanContentVO();
@@ -129,7 +129,6 @@ public class KanbanServiceImpl implements KanbanService {
         ret.setCooperating(cooperating);
         // 看板基本信息
         KanbanDO kanbanDO = kanbanDao.selectByPrimaryKey(kanbanId);
-        ShareKanbanDO shareKanbanDO = shareKanbanDao.selectByKanbanIdAndUserId(kanbanId, userId);
         List<Long> userids = shareKanbanDao.listUsersByKanbanId(kanbanId);
         // rpc
         Collection<UserInfoDO> userInfoDos = userRpcService.getUserInfoDoByList(userids.toArray(new Long[0])).getData().values();

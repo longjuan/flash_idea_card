@@ -28,4 +28,11 @@ public interface UserSecurityService {
      * @return 是否成功
      */
     boolean updateEmail(String email,Long userid);
+
+    /**
+     * 获取userid
+     * @param email 用户名（邮箱）
+     * @return userid
+     */
+    Long getUserId(String email);
 }

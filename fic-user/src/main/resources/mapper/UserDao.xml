@@ -39,4 +39,12 @@
         WHERE
             id = #{id}
     </select>
+    <select id="getUserId" resultType="java.lang.Long">
+        SELECT
+            id
+        FROM
+            `user`
+        WHERE
+            `username` = #{username}
+    </select>
 </mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.kanban.dao.InvitationDao">
+    <sql id="Base_Column_List">
+        invitation_id, invited_user, send_user, kanban_id, invitation_time, `state`
+
+    </sql>
+    <insert id="insert">
+        insert into invitation ( invited_user, send_user, kanban_id, `state` )
+        values ( #{invitedUser}, #{sendUser}, #{kanbanId}, #{state} )
+    </insert>
+    <update id="updateState">
+        update invitation
+        set `state` = #{state}
+        where kanban_id = #{kanbanId}
+            and
+              invited_user = #{userId}
+    </update>
+    <select id="selectByInvitedUser" resultType="top.zway.fic.base.entity.doo.InvitationDO">
+        select
+            <include refid="Base_Column_List"></include>
+        from
+            invitation
+        where
+            invited_user = #{invitedUser}
+          and
+            invitation_time > #{date}
+    </select>
+    <select id="selectByInvitationId" resultType="top.zway.fic.base.entity.doo.InvitationDO">
+        select
+            <include refid="Base_Column_List"></include>
+        from
+            invitation
+        where
+            invitation_id = #{invitationId}
+    </select>
+</mapper>

@@ -15,4 +15,7 @@ import java.util.HashMap;
 public interface UserRpcService {
     @PostMapping("/rpc/userinfo/list")
     public R<HashMap<Long, UserInfoDO>> getUserInfoDoByList(@RequestParam("userIds") Long[] userIds);
+
+    @PostMapping("/rpc/userinfo/id")
+    public R<HashMap<String, Long>> getUserIdByUsername(@RequestParam("email") String[] email);
 }

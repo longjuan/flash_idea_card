@@ -19,4 +19,9 @@ public class UserRpcServiceFallback implements UserRpcService {
         }
         return R.success(ret);
     }
+
+    @Override
+    public R<HashMap<String, Long>> getUserIdByUsername(String[] email) {
+        return R.success(new HashMap<>(0));
+    }
 }

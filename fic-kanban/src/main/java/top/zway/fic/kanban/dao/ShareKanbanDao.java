@@ -55,7 +55,7 @@ public interface ShareKanbanDao {
     List<Long> listUsersByKanbanId(@Param("kanbanId") Long kanbanId);
 
     /**
-     * 根据看板id查
+     * 根据用户和看板id查看板收藏等信息
      * @param userId 用户
      * @param kanbanId 看板id
      * @return 看板共享

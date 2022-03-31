@@ -68,4 +68,9 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         int num = userDao.updateUsername(email, userid);
         return num > 0;
     }
+
+    @Override
+    public Long getUserId(String email) {
+        return userDao.getUserId(email);
+    }
 }
