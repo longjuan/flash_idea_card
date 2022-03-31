@@ -13,6 +13,7 @@ import top.zway.fic.base.entity.vo.KanbanHomeVO;
 import top.zway.fic.base.result.R;
 import top.zway.fic.kanban.dao.*;
 import top.zway.fic.kanban.rpc.UserRpcService;
+import top.zway.fic.kanban.service.CacheService;
 import top.zway.fic.kanban.service.KanbanService;
 
 import java.util.*;
@@ -30,6 +31,7 @@ public class KanbanServiceImpl implements KanbanService {
     private final CardDao cardDao;
     private final TagDao tagDao;
     private final UserRpcService userRpcService;
+    private final CacheService cacheService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -122,6 +124,9 @@ public class KanbanServiceImpl implements KanbanService {
             return null;
         }
         KanbanContentVO ret = new KanbanContentVO();
+        // 协作
+        boolean cooperating = cacheService.isCooperating(kanbanId, userId);
+        ret.setCooperating(cooperating);
         // 看板基本信息
         KanbanDO kanbanDO = kanbanDao.selectByPrimaryKey(kanbanId);
         ShareKanbanDO shareKanbanDO = shareKanbanDao.selectByKanbanIdAndUserId(kanbanId, userId);
@@ -132,27 +137,36 @@ public class KanbanServiceImpl implements KanbanService {
         KanbanHomeVO kanbanHomeVO = new KanbanHomeVO(kanbanDO, shareKanbanDO, new ArrayList<>(userInfoDos));
         ret.setBaseInfo(kanbanHomeVO);
         // 列信息
-        ArrayList<ColumnVO> columns = new ArrayList<>();
-        List<KanbanColumnDO> kanbanColumnDoS = columnDao.selectByKanbanId(kanbanId);
-        for (KanbanColumnDO kanbanColumnDo : kanbanColumnDoS) {
-            List<CardDO> cardDoS = cardDao.selectByColumnIdOrdered(kanbanColumnDo.getColumnId());
-            cardDoS.sort(Comparator.comparingDouble(CardDO::getOrderInColumn));
-            List<CardVO> cardVOList = new ArrayList<>(cardDoS.size());
-            for (CardDO cardDo : cardDoS) {
-                // 构造card vo
-                List<TagDO> tagDoS = null;
-                if (cardDo.getTagged()) {
-                    tagDoS = tagDao.selectByCardId(cardDo.getCardId());
-                } else {
-                    tagDoS = new ArrayList<>(0);
+        List<ColumnVO> kanbanCache = cacheService.getKanbanCache(kanbanId);
+        if (kanbanCache == null){
+            ArrayList<ColumnVO> columns = new ArrayList<>();
+            List<KanbanColumnDO> kanbanColumnDoS = columnDao.selectByKanbanId(kanbanId);
+            for (KanbanColumnDO kanbanColumnDo : kanbanColumnDoS) {
+                // card
+                List<CardDO> cardDoS = cardDao.selectByColumnIdOrdered(kanbanColumnDo.getColumnId());
+                cardDoS.sort(Comparator.comparingDouble(CardDO::getOrderInColumn));
+                List<CardVO> cardVOList = new ArrayList<>(cardDoS.size());
+                for (CardDO cardDo : cardDoS) {
+                    // 构造card vo
+                    List<TagDO> tagDoS = null;
+                    if (cardDo.getTagged()) {
+                        tagDoS = tagDao.selectByCardId(cardDo.getCardId());
+                    } else {
+                        tagDoS = new ArrayList<>(0);
+                    }
+                    cardVOList.add(new CardVO(cardDo, tagDoS));
                 }
-                cardVOList.add(new CardVO(cardDo, tagDoS));
+                ColumnVO e = new ColumnVO(kanbanColumnDo, cardVOList);
+                columns.add(e);
             }
-            ColumnVO e = new ColumnVO(kanbanColumnDo, cardVOList);
-            columns.add(e);
+            columns.sort(Comparator.comparingDouble(ColumnVO::getColumnOrder));
+            ret.setColumns(columns);
+
+            // 设置缓存
+            cacheService.setKanbanCache(kanbanId, columns);
+        }else {
+            ret.setColumns(kanbanCache);
         }
-        columns.sort(Comparator.comparingDouble(ColumnVO::getColumnOrder));
-        ret.setColumns(columns);
         return ret;
     }
 }
