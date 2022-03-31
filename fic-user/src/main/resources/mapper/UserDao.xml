@@ -14,6 +14,12 @@
         WHERE
             id = #{id}
     </update>
+    <update id="updateUsername">
+        UPDATE `user`
+        SET `username` = #{username}
+        WHERE
+            id = #{id}
+    </update>
     <select id="countUsername" resultType="java.lang.Integer">
         SELECT
             COUNT( `username` )

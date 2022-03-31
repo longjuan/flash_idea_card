@@ -55,11 +55,17 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         // 检查旧密码输入是否正确
         String password = userDao.getUserDoById(userid).getPassword();
         boolean matches = passwordEncoder.matches(oldpw, password);
-        if (!matches){
+        if (!matches) {
             return false;
         }
         // 更新
         int num = userDao.updatePassword(passwordEncoder.encode(newpd), userid);
+        return num > 0;
+    }
+
+    @Override
+    public boolean updateEmail(String email, Long userid) {
+        int num = userDao.updateUsername(email, userid);
         return num > 0;
     }
 }
