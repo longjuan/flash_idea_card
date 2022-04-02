@@ -1,8 +1,8 @@
 server:
-  port: 9201
+  port: 9426
 spring:
   application:
-    name: fic-gateway
+    name: fic-search
   cloud:
     nacos:
       # 注册中心

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.zway.fic.base.entity.ao.CardAO;
+import top.zway.fic.base.entity.bo.SearchUpdateBO;
 import top.zway.fic.base.entity.doo.CardDO;
 import top.zway.fic.kanban.alg.MoveItemAlg;
 import top.zway.fic.kanban.dao.CardDao;
@@ -12,6 +13,7 @@ import top.zway.fic.kanban.dao.ShareKanbanDao;
 import top.zway.fic.kanban.dao.TagDao;
 import top.zway.fic.kanban.service.CacheService;
 import top.zway.fic.kanban.service.CardService;
+import top.zway.fic.kanban.service.SearchUpdateService;
 import top.zway.fic.web.exception.BizException;
 
 import java.util.List;
@@ -27,6 +29,7 @@ public class CardServiceImpl implements CardService {
     private final TagDao tagDao;
     private final ColumnDao columnDao;
     private final CacheService cacheService;
+    private final SearchUpdateService searchUpdateService;
 
 
     @Override
@@ -50,6 +53,7 @@ public class CardServiceImpl implements CardService {
         int insert = cardDao.insert(cardDO);
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.CARD, cardDO.getCardId()));
         return insert > 0;
     }
 
@@ -82,6 +86,7 @@ public class CardServiceImpl implements CardService {
         int delete = cardDao.delete(cardId);
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.CARD, cardId));
         return delete > 0;
     }
 
@@ -98,6 +103,7 @@ public class CardServiceImpl implements CardService {
         int updateBaseInfo = cardDao.updateBaseInfo(record);
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.CARD, cardAo.getCardId()));
         return updateBaseInfo > 0;
     }
 
@@ -119,7 +125,7 @@ public class CardServiceImpl implements CardService {
         // 计算新顺序
         Double newOrder = MoveItemAlg.countNewOrder(orders, getSize, down);
         int update = cardDao.setOrder(newOrder, cardId);
-        // 更新缓存
+        // 更新缓存 不需要更新搜索
         cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
         return update > 0;
     }
@@ -137,12 +143,13 @@ public class CardServiceImpl implements CardService {
             return false;
         }
         Double lastOrder = cardDao.getLastOrder(columnId);
-        if (lastOrder == null){
+        if (lastOrder == null) {
             lastOrder = (double) 0;
         }
         int transferCard = cardDao.transferCard(cardId, lastOrder + 1, columnId);
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanIdByCardId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanIdByCardId, SearchUpdateBO.UpdateTypeEnum.CARD, cardId));
         return transferCard > 0;
     }
 }

@@ -12,8 +12,6 @@ spring:
       config:
         server-addr: ${spring.cloud.nacos.discovery.server-addr}
         file-extension: yaml
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
 management:
   endpoints:
     web:

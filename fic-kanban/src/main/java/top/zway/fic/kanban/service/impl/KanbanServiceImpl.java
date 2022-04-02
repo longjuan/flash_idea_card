@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.zway.fic.base.entity.ao.KanbanAO;
+import top.zway.fic.base.entity.bo.SearchUpdateBO;
 import top.zway.fic.base.entity.doo.*;
 import top.zway.fic.base.entity.vo.CardVO;
 import top.zway.fic.base.entity.vo.ColumnVO;
@@ -15,6 +16,7 @@ import top.zway.fic.kanban.dao.*;
 import top.zway.fic.kanban.rpc.UserRpcService;
 import top.zway.fic.kanban.service.CacheService;
 import top.zway.fic.kanban.service.KanbanService;
+import top.zway.fic.kanban.service.SearchUpdateService;
 
 import java.util.*;
 
@@ -32,6 +34,7 @@ public class KanbanServiceImpl implements KanbanService {
     private final TagDao tagDao;
     private final UserRpcService userRpcService;
     private final CacheService cacheService;
+    private final SearchUpdateService searchUpdateService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -46,6 +49,7 @@ public class KanbanServiceImpl implements KanbanService {
         // 插入授权记录
         ShareKanbanDO record = new ShareKanbanDO(kanbanDO.getKanbanId(), kanbanDO.getOwnerId(), false, null);
         int insert = shareKanbanDao.insert(record);
+        searchUpdateService.update(new SearchUpdateBO(record.getKanbanId(), SearchUpdateBO.UpdateTypeEnum.KANBAN, record.getKanbanId()));
         return insert > 0;
     }
 
@@ -70,6 +74,7 @@ public class KanbanServiceImpl implements KanbanService {
         shareKanbanDao.deleteByKanbanId(kanbanId);
         // 删除看板
         int delete = kanbanDao.deleteByPrimaryKey(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.KANBAN, kanbanId));
         return delete > 0;
     }
 
@@ -84,6 +89,7 @@ public class KanbanServiceImpl implements KanbanService {
         KanbanDO record = new KanbanDO(kanbanAo.getKanbanId(), kanbanAo.getOwnerId(), kanbanAo.getTitle(),
                 null, kanbanAo.getColor(), null, null);
         int update = kanbanDao.updateBaseInfo(record);
+        searchUpdateService.update(new SearchUpdateBO(kanbanAo.getKanbanId(), SearchUpdateBO.UpdateTypeEnum.KANBAN, kanbanAo.getKanbanId()));
         return update > 0;
     }
 
@@ -137,7 +143,7 @@ public class KanbanServiceImpl implements KanbanService {
         ret.setBaseInfo(kanbanHomeVO);
         // 列信息
         List<ColumnVO> kanbanCache = cacheService.getKanbanCache(kanbanId);
-        if (kanbanCache == null){
+        if (kanbanCache == null) {
             ArrayList<ColumnVO> columns = new ArrayList<>();
             List<KanbanColumnDO> kanbanColumnDoS = columnDao.selectByKanbanId(kanbanId);
             for (KanbanColumnDO kanbanColumnDo : kanbanColumnDoS) {
@@ -163,7 +169,7 @@ public class KanbanServiceImpl implements KanbanService {
 
             // 设置缓存
             cacheService.setKanbanCache(kanbanId, columns);
-        }else {
+        } else {
             ret.setColumns(kanbanCache);
         }
         return ret;

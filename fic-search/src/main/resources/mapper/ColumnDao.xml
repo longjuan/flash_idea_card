@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.search.dao.ColumnDao">
+    <sql id="Base_Column_List">
+        column_id, column_order, column_title, kanban_id, update_user, create_time, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" resultType="top.zway.fic.base.entity.doo.KanbanColumnDO">
+        select
+        <include refid="Base_Column_List" />
+        from kanban_column
+        where column_id = #{columnId}
+    </select>
+
+    <select id="selectByKanbanId" resultType="top.zway.fic.base.entity.doo.KanbanColumnDO">
+        select
+        <include refid="Base_Column_List" />
+        from kanban_column
+        where kanban_id = #{kanbanId}
+    </select>
+</mapper>

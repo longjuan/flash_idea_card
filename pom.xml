@@ -13,6 +13,7 @@
         <module>fic-gateway</module>
         <module>fic-user</module>
         <module>fic-kanban</module>
+        <module>fic-search</module>
     </modules>
     <packaging>pom</packaging>
 

@@ -15,4 +15,8 @@ public class RedisConstant {
 
     public static final long COOPERATING_KANBAN_STATISTIC_EXPIRE_SECOND = 100L;
 
+    public static final String KANBAN_FULL_UPDATE_TIMER_PREFIX = "TIMER:KANBAN_FULL_UPDATE_";
+
+    public static final long KANBAN_FULL_UPDATE_TIMER_EXP_TIME = 60 * 20;
+
 }

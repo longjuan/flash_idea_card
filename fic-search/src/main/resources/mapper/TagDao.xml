@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.search.dao.TagDao">
+    <sql id="Base_Column_List">
+        tag_id, card_id, type, color, content, kanban_id, create_user, create_time
+    </sql>
+
+    <select id="selectByPrimaryKey" resultType="top.zway.fic.base.entity.doo.TagDO">
+        select
+        <include refid="Base_Column_List" />
+        from tag
+        where tag_id = #{tagId}
+    </select>
+    <select id="selectByKanbanId" resultType="top.zway.fic.base.entity.doo.TagDO">
+        select
+        <include refid="Base_Column_List" />
+        from tag
+        where kanban_id = #{kanbanId}
+    </select>
+</mapper>

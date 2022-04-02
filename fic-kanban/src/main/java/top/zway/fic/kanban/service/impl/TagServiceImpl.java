@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.zway.fic.base.entity.ao.TagAO;
+import top.zway.fic.base.entity.bo.SearchUpdateBO;
 import top.zway.fic.base.entity.doo.TagDO;
 import top.zway.fic.kanban.dao.CardDao;
 import top.zway.fic.kanban.dao.ShareKanbanDao;
 import top.zway.fic.kanban.dao.TagDao;
 import top.zway.fic.kanban.service.CacheService;
+import top.zway.fic.kanban.service.SearchUpdateService;
 import top.zway.fic.kanban.service.TagService;
 
 /**
@@ -21,6 +23,7 @@ public class TagServiceImpl implements TagService {
     private final ShareKanbanDao shareKanbanDao;
     private final CardDao cardDao;
     private final CacheService cacheService;
+    private final SearchUpdateService searchUpdateService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -43,6 +46,7 @@ public class TagServiceImpl implements TagService {
         cardDao.updateTaggedState(tagAo.getCardId(), true);
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.TAG, tagDO.getTagId()));
         return insert > 0;
     }
 
@@ -71,6 +75,7 @@ public class TagServiceImpl implements TagService {
         }
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.TAG, tagId));
         return delete > 0;
     }
 }

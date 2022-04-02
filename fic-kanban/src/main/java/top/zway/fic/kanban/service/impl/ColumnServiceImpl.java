@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.zway.fic.base.entity.ao.KanbanColumnAO;
+import top.zway.fic.base.entity.bo.SearchUpdateBO;
 import top.zway.fic.base.entity.doo.KanbanColumnDO;
 import top.zway.fic.kanban.alg.MoveItemAlg;
 import top.zway.fic.kanban.dao.CardDao;
@@ -12,6 +13,7 @@ import top.zway.fic.kanban.dao.ShareKanbanDao;
 import top.zway.fic.kanban.dao.TagDao;
 import top.zway.fic.kanban.service.CacheService;
 import top.zway.fic.kanban.service.ColumnService;
+import top.zway.fic.kanban.service.SearchUpdateService;
 import top.zway.fic.web.exception.BizException;
 
 import java.util.List;
@@ -27,6 +29,7 @@ public class ColumnServiceImpl implements ColumnService {
     private final CardDao cardDao;
     private final TagDao tagDao;
     private final CacheService cacheService;
+    private final SearchUpdateService searchUpdateService;
 
     private Long isNoAuthorityByKanbanId(Long kanbanId, Long userId) {
         int access = shareKanbanDao.countHaveJoinedUser(kanbanId, userId);
@@ -55,6 +58,8 @@ public class ColumnServiceImpl implements ColumnService {
         int insert = columnDao.insert(kanbanColumnDO);
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanColumnAo.getKanbanId());
+        searchUpdateService.update(new SearchUpdateBO(kanbanColumnAo.getKanbanId(), SearchUpdateBO.UpdateTypeEnum.COLUMN,
+                kanbanColumnDO.getColumnId()));
         return insert > 0;
     }
 
@@ -77,6 +82,7 @@ public class ColumnServiceImpl implements ColumnService {
         int delete = columnDao.delete(columnId);
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.COLUMN, columnId));
         return delete > 0;
     }
 
@@ -92,6 +98,7 @@ public class ColumnServiceImpl implements ColumnService {
         int updateBaseInfo = columnDao.updateBaseInfo(kanbanColumnDO);
         // 更新缓存
         cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.COLUMN, kanbanColumnAo.getColumnId()));
         return updateBaseInfo > 0;
     }
 

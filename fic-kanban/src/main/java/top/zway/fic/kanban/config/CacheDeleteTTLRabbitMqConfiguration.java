@@ -49,13 +49,13 @@ public class CacheDeleteTTLRabbitMqConfiguration {
     // 绑定
 
     @Bean
-    public Binding smsTTLDirectBinding(@Qualifier("cacheDeleteTTLExchange") FanoutExchange cacheDeleteTTLExchange,
+    public Binding cacheDeleteTTLFanoutBinding(@Qualifier("cacheDeleteTTLExchange") FanoutExchange cacheDeleteTTLExchange,
                                        @Qualifier("cacheDeleteTTLQueue") Queue cacheDeleteTTLQueue) {
         return BindingBuilder.bind(cacheDeleteTTLQueue).to(cacheDeleteTTLExchange);
     }
 
     @Bean
-    public Binding smsTTLMessageDirectBinding(@Qualifier("cacheDeleteDeadExchange") FanoutExchange cacheDeleteDeadExchange,
+    public Binding cacheDeleteDeadFanoutBinding(@Qualifier("cacheDeleteDeadExchange") FanoutExchange cacheDeleteDeadExchange,
                                               @Qualifier("cacheDeleteDeadQueue") Queue cacheDeleteDeadQueue) {
         return BindingBuilder.bind(cacheDeleteDeadQueue).to(cacheDeleteDeadExchange);
     }

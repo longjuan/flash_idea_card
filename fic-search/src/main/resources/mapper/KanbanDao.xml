@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.search.dao.KanbanDao">
+    <sql id="Base_Column_List">
+        kanban_id, owner_id, title, create_time, color, type, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultType="top.zway.fic.base.entity.doo.KanbanDO">
+        select
+        <include refid="Base_Column_List" />
+        from kanban
+        where kanban_id = #{kanbanId}
+    </select>
+
+</mapper>

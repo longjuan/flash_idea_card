@@ -2,6 +2,7 @@ package top.zway.fic.kanban.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import top.zway.fic.base.constant.RedisConstant;
 import top.zway.fic.base.entity.vo.ColumnVO;
@@ -21,6 +22,7 @@ public class CacheServiceImpl implements CacheService {
     private final RabbitTemplate rabbitTemplate;
 
     @Override
+    @Async
     public void setKanbanCache(Long kanbanId, List<ColumnVO> columns) {
         redisUtils.set(RedisConstant.KANBAN_CACHE + kanbanId, columns, RedisConstant.KANBAN_CACHE_EXPIRE_SECOND);
     }
