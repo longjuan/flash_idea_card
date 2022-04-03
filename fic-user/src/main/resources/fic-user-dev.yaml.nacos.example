@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: # jdbc:mysql://localhost:3306/fic_user?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: #
+    password: #
+  cloud:
+    sentinel:
+      transport:
+        dashboard: # 127.0.0.1:8080
+        # 与sentinel通讯端口，被占用会自动+1寻找没有被占用的端口
+        port: 8719
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: top.zway.fic.base.entity
+oss:
+  aws:
+    access-key-id: # s3 oss id
+    access-key-secret: # s3 oss secret
+  s3:
+    default-bucket: # bucket name
+    endpoint: # s3 api
+    dirname: # fic
+  cdn: # oss cdn url

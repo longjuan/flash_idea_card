@@ -1,0 +1,46 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: fic-auth_oauth
+          uri: lb://fic-auth
+          predicates:
+            - Path=/oauth/**
+        - id: fic-user
+          uri: lb://fic-user
+          predicates:
+            - Path=/user/**
+        - id: fic-kanban
+          uri: lb://fic-kanban
+          predicates:
+            - Path=/kanban/**
+        - id: fic-kanban_invitation
+          uri: lb://fic-kanban
+          predicates:
+            - Path=/invitation/**
+        - id: fic-search
+          uri: lb://fic-search
+          predicates:
+            - Path=/search/**
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: # 'http://localhost:4011/rsa/publicKey'
+  redis:
+    database: #
+    port: #
+    host: #
+    password: #
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+secure:
+  ignore:
+    urls: #配置白名单路径
+      - "/actuator/**"
+      - "/oauth/token"
+      - "/user/register"
