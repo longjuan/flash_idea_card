@@ -16,4 +16,6 @@ public class KanbanContentVO {
     private KanbanHomeVO baseInfo;
 
     private List<ColumnVO> columns;
+
+    private Boolean cooperating;
 }

@@ -4,13 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.zway.fic.base.entity.ao.CardAO;
+import top.zway.fic.base.entity.bo.SearchUpdateBO;
 import top.zway.fic.base.entity.doo.CardDO;
 import top.zway.fic.kanban.alg.MoveItemAlg;
 import top.zway.fic.kanban.dao.CardDao;
 import top.zway.fic.kanban.dao.ColumnDao;
 import top.zway.fic.kanban.dao.ShareKanbanDao;
 import top.zway.fic.kanban.dao.TagDao;
+import top.zway.fic.kanban.service.CacheService;
 import top.zway.fic.kanban.service.CardService;
+import top.zway.fic.kanban.service.SearchUpdateService;
 import top.zway.fic.web.exception.BizException;
 
 import java.util.List;
@@ -25,6 +28,8 @@ public class CardServiceImpl implements CardService {
     private final ShareKanbanDao shareKanbanDao;
     private final TagDao tagDao;
     private final ColumnDao columnDao;
+    private final CacheService cacheService;
+    private final SearchUpdateService searchUpdateService;
 
 
     @Override
@@ -35,7 +40,7 @@ public class CardServiceImpl implements CardService {
             return false;
         }
         // 鉴权
-        if (isNoAuthorityByKanbanId(kanbanId, cardAo.getUpdateUser())) {
+        if (isNoAuthorityByKanbanId(kanbanId, cardAo.getUpdateUser()) == null) {
             return false;
         }
         // 找到最后的顺序
@@ -46,55 +51,67 @@ public class CardServiceImpl implements CardService {
         cardDO.setOrderInColumn(lastOrder == null ? 1 : lastOrder + 1);
         // 插入
         int insert = cardDao.insert(cardDO);
+        // 更新缓存
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.CARD, cardDO.getCardId()));
         return insert > 0;
     }
 
-    private boolean isNoAuthorityByCardId(Long cardId, Long userId) {
+    private Long isNoAuthorityByCardId(Long cardId, Long userId) {
         // 卡片是否在此看板
         Long kanbanId = cardDao.getKanbanIdByCardId(cardId);
         if (kanbanId == null) {
-            return true;
+            return null;
         }
         return isNoAuthorityByKanbanId(kanbanId, userId);
     }
 
-    private boolean isNoAuthorityByKanbanId(Long kanbanId, Long userId) {
+    private Long isNoAuthorityByKanbanId(Long kanbanId, Long userId) {
         // 鉴权
         int count = shareKanbanDao.countHaveJoinedUser(kanbanId, userId);
-        return count <= 0;
+        return count <= 0 ? null : kanbanId;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteCard(Long cardId, Long userId) {
         // 鉴权
-        if (isNoAuthorityByCardId(cardId, userId)) {
+        Long kanbanId = isNoAuthorityByCardId(cardId, userId);
+        if (kanbanId == null) {
             return false;
         }
         // 删tag
         tagDao.deleteByCardId(cardId);
         // 删card
         int delete = cardDao.delete(cardId);
+        // 更新缓存
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.CARD, cardId));
         return delete > 0;
     }
 
     @Override
     public boolean updateColumn(CardAO cardAo) {
         // 鉴权
-        if (isNoAuthorityByCardId(cardAo.getCardId(), cardAo.getUpdateUser())) {
+        Long kanbanId = isNoAuthorityByCardId(cardAo.getCardId(), cardAo.getUpdateUser());
+        if (kanbanId == null) {
             return false;
         }
         // 修改
         CardDO record = new CardDO(cardAo.getCardId(), null, null, null, null,
                 cardAo.getContent(), null, cardAo.getUpdateUser(), null);
         int updateBaseInfo = cardDao.updateBaseInfo(record);
+        // 更新缓存
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.CARD, cardAo.getCardId()));
         return updateBaseInfo > 0;
     }
 
     @Override
     public boolean moveColumn(Integer move, Long cardId, Long userId) {
         // 鉴权
-        if (isNoAuthorityByCardId(cardId, userId)) {
+        Long kanbanId = isNoAuthorityByCardId(cardId, userId);
+        if (kanbanId == null) {
             return false;
         }
         if (move == 0) {
@@ -108,6 +125,8 @@ public class CardServiceImpl implements CardService {
         // 计算新顺序
         Double newOrder = MoveItemAlg.countNewOrder(orders, getSize, down);
         int update = cardDao.setOrder(newOrder, cardId);
+        // 更新缓存 不需要更新搜索
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
         return update > 0;
     }
 
@@ -120,14 +139,17 @@ public class CardServiceImpl implements CardService {
                 kanbanIdByCardId.longValue() != kanbanIdByColumnId.longValue()) {
             return false;
         }
-        if (isNoAuthorityByKanbanId(kanbanIdByCardId, userId)) {
+        if (isNoAuthorityByKanbanId(kanbanIdByCardId, userId) == null) {
             return false;
         }
         Double lastOrder = cardDao.getLastOrder(columnId);
-        if (lastOrder == null){
+        if (lastOrder == null) {
             lastOrder = (double) 0;
         }
         int transferCard = cardDao.transferCard(cardId, lastOrder + 1, columnId);
+        // 更新缓存
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanIdByCardId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanIdByCardId, SearchUpdateBO.UpdateTypeEnum.CARD, cardId));
         return transferCard > 0;
     }
 }

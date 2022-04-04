@@ -31,6 +31,7 @@ public class AuthController {
             Principal principal,
             @RequestParam Map<String, String> parameters
     ) throws HttpRequestMethodNotSupportedException {
+        // XXX 登录验证码 暂不实现
         OAuth2AccessToken accessToken = tokenEndpoint.postAccessToken(principal, parameters).getBody();
         return R.success(accessToken);
     }

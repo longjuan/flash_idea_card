@@ -13,6 +13,7 @@
         <module>fic-gateway</module>
         <module>fic-user</module>
         <module>fic-kanban</module>
+        <module>fic-search</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -20,6 +21,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <docker.host>http://127.0.0.1:2375</docker.host>
+        <docker.registry.repository>127.0.0.1:5000</docker.registry.repository>
+        <docker.maven.plugin.version>1.2.2</docker.maven.plugin.version>
         <junit.version>4.12</junit.version>
         <lombok.version>1.18.22</lombok.version>
         <mysql.version>5.1.47</mysql.version>
@@ -101,15 +105,62 @@
     </dependencyManagement>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <fork>true</fork>
-                    <addResources>true</addResources>
-                </configuration>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>2.2.2.RELEASE</version>
+                    <configuration>
+                        <fork>true</fork>
+                        <addResources>true</addResources>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.spotify</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>${docker.maven.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>build-image</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>build</goal>
+                                <goal>push</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <imageName>${docker.registry.repository}/${project.artifactId}:${project.version}</imageName>
+                        <dockerHost>${docker.host}</dockerHost>
+                        <serverId>docker-repo</serverId>
+                        <baseImage>openjdk:8-jre-slim</baseImage>
+                        <pushImage>true</pushImage>
+                        <registryUrl>${docker.registry.repository}</registryUrl>
+                        <runs>
+                            <run>ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</run>
+                            <run>echo 'Asia/Shanghai' >/etc/timezone</run>
+                        </runs>
+                        <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]
+                        </entryPoint>
+                        <cmd>["--spring.profiles.active=prod"]</cmd>
+                        <resources>
+                            <resource>
+                                <targetPath>/</targetPath>
+                                <directory>${project.build.directory}</directory>
+                                <include>${project.build.finalName}.jar</include>
+                            </resource>
+                        </resources>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>

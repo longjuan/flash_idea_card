@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.zway.fic.search.dao.CardDao">
+    <resultMap id="BaseResultMap" type="top.zway.fic.base.entity.doo.CardDO">
+        <id column="card_id" jdbcType="BIGINT" property="cardId" />
+        <result column="order_in_column" jdbcType="INTEGER" property="orderInColumn" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="column_id" jdbcType="BIGINT" property="columnId" />
+        <result column="kanban_id" jdbcType="BIGINT" property="kanbanId" />
+        <result column="content" jdbcType="VARCHAR" property="content" />
+        <result column="is_tagged" jdbcType="TINYINT" property="tagged" />
+        <result column="update_user" jdbcType="BIGINT" property="updateUser" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        card_id, order_in_column, update_time, column_id, kanban_id, content, is_tagged,
+    update_user, create_time
+    </sql>
+
+    <select id="selectByCardId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from card
+        where card_id = #{cardId}
+    </select>
+    <select id="selectByKanbanId" resultType="top.zway.fic.base.entity.doo.CardDO">
+        select
+        <include refid="Base_Column_List" />
+        from card
+        where kanban_id = #{kanbanId}
+    </select>
+</mapper>

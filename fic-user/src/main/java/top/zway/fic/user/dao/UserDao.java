@@ -37,4 +37,19 @@ public interface UserDao {
      * @return 数量
      */
     int updatePassword(@Param("password") String password,@Param("id") Long id);
+
+    /**
+     * 修改用户名（邮箱）
+     * @param username 用户名（邮箱）
+     * @param id 用户id
+     * @return 数量
+     */
+    int updateUsername(@Param("username") String username,@Param("id") Long id);
+
+    /**
+     * 用户名获取用户id
+     * @param username 用户名
+     * @return 用户id
+     */
+    Long getUserId(@Param("username") String username);
 }

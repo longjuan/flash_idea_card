@@ -20,4 +20,19 @@ public interface UserSecurityService {
      * @return 是否成功
      */
     boolean updatePassword(String oldpw, String newpd, Long userid);
+
+    /**
+     * 更换邮箱（用户名）
+     * @param email 新邮箱
+     * @param userid 用户id
+     * @return 是否成功
+     */
+    boolean updateEmail(String email,Long userid);
+
+    /**
+     * 获取userid
+     * @param email 用户名（邮箱）
+     * @return userid
+     */
+    Long getUserId(String email);
 }

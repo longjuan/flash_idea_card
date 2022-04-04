@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.zway.fic.base.entity.ao.KanbanAO;
+import top.zway.fic.base.entity.bo.SearchUpdateBO;
 import top.zway.fic.base.entity.doo.*;
 import top.zway.fic.base.entity.vo.CardVO;
 import top.zway.fic.base.entity.vo.ColumnVO;
@@ -13,7 +14,9 @@ import top.zway.fic.base.entity.vo.KanbanHomeVO;
 import top.zway.fic.base.result.R;
 import top.zway.fic.kanban.dao.*;
 import top.zway.fic.kanban.rpc.UserRpcService;
+import top.zway.fic.kanban.service.CacheService;
 import top.zway.fic.kanban.service.KanbanService;
+import top.zway.fic.kanban.service.SearchUpdateService;
 
 import java.util.*;
 
@@ -30,6 +33,8 @@ public class KanbanServiceImpl implements KanbanService {
     private final CardDao cardDao;
     private final TagDao tagDao;
     private final UserRpcService userRpcService;
+    private final CacheService cacheService;
+    private final SearchUpdateService searchUpdateService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -44,6 +49,7 @@ public class KanbanServiceImpl implements KanbanService {
         // 插入授权记录
         ShareKanbanDO record = new ShareKanbanDO(kanbanDO.getKanbanId(), kanbanDO.getOwnerId(), false, null);
         int insert = shareKanbanDao.insert(record);
+        searchUpdateService.update(new SearchUpdateBO(record.getKanbanId(), SearchUpdateBO.UpdateTypeEnum.KANBAN, record.getKanbanId()));
         return insert > 0;
     }
 
@@ -68,6 +74,7 @@ public class KanbanServiceImpl implements KanbanService {
         shareKanbanDao.deleteByKanbanId(kanbanId);
         // 删除看板
         int delete = kanbanDao.deleteByPrimaryKey(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.KANBAN, kanbanId));
         return delete > 0;
     }
 
@@ -82,6 +89,7 @@ public class KanbanServiceImpl implements KanbanService {
         KanbanDO record = new KanbanDO(kanbanAo.getKanbanId(), kanbanAo.getOwnerId(), kanbanAo.getTitle(),
                 null, kanbanAo.getColor(), null, null);
         int update = kanbanDao.updateBaseInfo(record);
+        searchUpdateService.update(new SearchUpdateBO(kanbanAo.getKanbanId(), SearchUpdateBO.UpdateTypeEnum.KANBAN, kanbanAo.getKanbanId()));
         return update > 0;
     }
 
@@ -117,14 +125,16 @@ public class KanbanServiceImpl implements KanbanService {
     @Override
     public KanbanContentVO getKanbanContent(Long userId, Long kanbanId) {
         // 鉴权
-        KanbanDO role = kanbanDao.selectByPrimaryKey(kanbanId);
-        if (role == null || role.getOwnerId().longValue() != userId.longValue()) {
+        ShareKanbanDO shareKanbanDO = shareKanbanDao.selectByKanbanIdAndUserId(kanbanId, userId);
+        if (shareKanbanDO == null) {
             return null;
         }
         KanbanContentVO ret = new KanbanContentVO();
+        // 协作
+        boolean cooperating = cacheService.isCooperating(kanbanId, userId);
+        ret.setCooperating(cooperating);
         // 看板基本信息
         KanbanDO kanbanDO = kanbanDao.selectByPrimaryKey(kanbanId);
-        ShareKanbanDO shareKanbanDO = shareKanbanDao.selectByKanbanIdAndUserId(kanbanId, userId);
         List<Long> userids = shareKanbanDao.listUsersByKanbanId(kanbanId);
         // rpc
         Collection<UserInfoDO> userInfoDos = userRpcService.getUserInfoDoByList(userids.toArray(new Long[0])).getData().values();
@@ -132,26 +142,36 @@ public class KanbanServiceImpl implements KanbanService {
         KanbanHomeVO kanbanHomeVO = new KanbanHomeVO(kanbanDO, shareKanbanDO, new ArrayList<>(userInfoDos));
         ret.setBaseInfo(kanbanHomeVO);
         // 列信息
-        ArrayList<ColumnVO> columns = new ArrayList<>();
-        List<KanbanColumnDO> kanbanColumnDoS = columnDao.selectByKanbanId(kanbanId);
-        for (KanbanColumnDO kanbanColumnDo : kanbanColumnDoS) {
-            List<CardDO> cardDoS = cardDao.selectByColumnIdOrdered(kanbanColumnDo.getColumnId());
-            int cOder = 1;
-            List<CardVO> cardVOList = new ArrayList<>(cardDoS.size());
-            for (CardDO cardDo : cardDoS) {
-                // 构造card vo
-                List<TagDO> tagDoS = null;
-                if (cardDo.getTagged()) {
-                    tagDoS = tagDao.selectByCardId(cardDo.getCardId());
-                }else {
-                    tagDoS = new ArrayList<>(0);
+        List<ColumnVO> kanbanCache = cacheService.getKanbanCache(kanbanId);
+        if (kanbanCache == null) {
+            ArrayList<ColumnVO> columns = new ArrayList<>();
+            List<KanbanColumnDO> kanbanColumnDoS = columnDao.selectByKanbanId(kanbanId);
+            for (KanbanColumnDO kanbanColumnDo : kanbanColumnDoS) {
+                // card
+                List<CardDO> cardDoS = cardDao.selectByColumnIdOrdered(kanbanColumnDo.getColumnId());
+                cardDoS.sort(Comparator.comparingDouble(CardDO::getOrderInColumn));
+                List<CardVO> cardVOList = new ArrayList<>(cardDoS.size());
+                for (CardDO cardDo : cardDoS) {
+                    // 构造card vo
+                    List<TagDO> tagDoS = null;
+                    if (cardDo.getTagged()) {
+                        tagDoS = tagDao.selectByCardId(cardDo.getCardId());
+                    } else {
+                        tagDoS = new ArrayList<>(0);
+                    }
+                    cardVOList.add(new CardVO(cardDo, tagDoS));
                 }
-                cardVOList.add(new CardVO(cardDo, cOder++, tagDoS));
+                ColumnVO e = new ColumnVO(kanbanColumnDo, cardVOList);
+                columns.add(e);
             }
-            ColumnVO e = new ColumnVO(kanbanColumnDo,cardVOList);
-            columns.add(e);
+            columns.sort(Comparator.comparingDouble(ColumnVO::getColumnOrder));
+            ret.setColumns(columns);
+
+            // 设置缓存
+            cacheService.setKanbanCache(kanbanId, columns);
+        } else {
+            ret.setColumns(kanbanCache);
         }
-        ret.setColumns(columns);
         return ret;
     }
 }

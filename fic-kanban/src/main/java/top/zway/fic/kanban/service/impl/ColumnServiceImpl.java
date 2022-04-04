@@ -4,13 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.zway.fic.base.entity.ao.KanbanColumnAO;
+import top.zway.fic.base.entity.bo.SearchUpdateBO;
 import top.zway.fic.base.entity.doo.KanbanColumnDO;
 import top.zway.fic.kanban.alg.MoveItemAlg;
 import top.zway.fic.kanban.dao.CardDao;
 import top.zway.fic.kanban.dao.ColumnDao;
 import top.zway.fic.kanban.dao.ShareKanbanDao;
 import top.zway.fic.kanban.dao.TagDao;
+import top.zway.fic.kanban.service.CacheService;
 import top.zway.fic.kanban.service.ColumnService;
+import top.zway.fic.kanban.service.SearchUpdateService;
 import top.zway.fic.web.exception.BizException;
 
 import java.util.List;
@@ -25,13 +28,15 @@ public class ColumnServiceImpl implements ColumnService {
     private final ShareKanbanDao shareKanbanDao;
     private final CardDao cardDao;
     private final TagDao tagDao;
+    private final CacheService cacheService;
+    private final SearchUpdateService searchUpdateService;
 
-    private boolean isNoAuthorityByKanbanId(Long kanbanId, Long userId) {
+    private Long isNoAuthorityByKanbanId(Long kanbanId, Long userId) {
         int access = shareKanbanDao.countHaveJoinedUser(kanbanId, userId);
-        return access < 1;
+        return access < 1 ? null : kanbanId;
     }
 
-    private boolean isNoAuthorityByColumnId(Long columnId, Long userId) {
+    private Long isNoAuthorityByColumnId(Long columnId, Long userId) {
         Long kanbanId = columnDao.getKanbanIdByColumnId(columnId);
         return isNoAuthorityByKanbanId(kanbanId, userId);
     }
@@ -39,7 +44,7 @@ public class ColumnServiceImpl implements ColumnService {
     @Override
     public boolean insertColumn(KanbanColumnAO kanbanColumnAo) {
         // 校验权限
-        if (isNoAuthorityByKanbanId(kanbanColumnAo.getKanbanId(), kanbanColumnAo.getUpdateUser())) {
+        if (isNoAuthorityByKanbanId(kanbanColumnAo.getKanbanId(), kanbanColumnAo.getUpdateUser()) == null) {
             return false;
         }
         // 获取最大的顺序
@@ -51,6 +56,10 @@ public class ColumnServiceImpl implements ColumnService {
         kanbanColumnDO.setColumnOrder(lastOrder == null ? 1 : lastOrder + 1);
         // 插入
         int insert = columnDao.insert(kanbanColumnDO);
+        // 更新缓存
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanColumnAo.getKanbanId());
+        searchUpdateService.update(new SearchUpdateBO(kanbanColumnAo.getKanbanId(), SearchUpdateBO.UpdateTypeEnum.COLUMN,
+                kanbanColumnDO.getColumnId()));
         return insert > 0;
     }
 
@@ -58,7 +67,8 @@ public class ColumnServiceImpl implements ColumnService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteColumn(Long columnId, Long userId) {
         // 校验权限
-        if (isNoAuthorityByColumnId(columnId, userId)) {
+        Long kanbanId = isNoAuthorityByColumnId(columnId, userId);
+        if (kanbanId == null) {
             return false;
         }
         // 删除所有下属tag
@@ -70,26 +80,33 @@ public class ColumnServiceImpl implements ColumnService {
         cardDao.deleteByColumnId(columnId);
         // 删除列
         int delete = columnDao.delete(columnId);
+        // 更新缓存
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.COLUMN, columnId));
         return delete > 0;
     }
 
     @Override
     public boolean updateColumn(KanbanColumnAO kanbanColumnAo) {
         // 校验权限
-        if (isNoAuthorityByColumnId(kanbanColumnAo.getColumnId(), kanbanColumnAo.getUpdateUser())) {
+        Long kanbanId = isNoAuthorityByColumnId(kanbanColumnAo.getColumnId(), kanbanColumnAo.getUpdateUser());
+        if (kanbanId == null) {
             return false;
         }
         KanbanColumnDO kanbanColumnDO = new KanbanColumnDO(kanbanColumnAo.getColumnId(), null,
                 kanbanColumnAo.getColumnTitle(), null, kanbanColumnAo.getUpdateUser(), null, null);
         int updateBaseInfo = columnDao.updateBaseInfo(kanbanColumnDO);
+        // 更新缓存
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
+        searchUpdateService.update(new SearchUpdateBO(kanbanId, SearchUpdateBO.UpdateTypeEnum.COLUMN, kanbanColumnAo.getColumnId()));
         return updateBaseInfo > 0;
     }
 
     @Override
     public boolean moveColumn(int move, Long columnId, Long userId) {
         // 校验权限
-        Long kanbanId = columnDao.getKanbanIdByColumnId(columnId);
-        if (isNoAuthorityByKanbanId(kanbanId, userId)) {
+        Long kanbanId = isNoAuthorityByColumnId(columnId, userId);
+        if (kanbanId == null) {
             return false;
         }
         if (move == 0) {
@@ -103,6 +120,8 @@ public class ColumnServiceImpl implements ColumnService {
         Double newOrder = MoveItemAlg.countNewOrder(orders, getSize, down);
         // 更新
         int update = columnDao.setOrder(newOrder, columnId);
+        // 更新缓存
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanId);
         return update > 0;
     }
 }
