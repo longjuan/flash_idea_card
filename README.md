@@ -4,13 +4,11 @@
 
 前端：https://github.com/longjuan/flash_idea_card_ui
 
-![image-20220404193613984](https://one.zway.top/api/v3/file/source/129/image-20220404193613984_vzL.png?sign=izbrRa7fgKt40euyvXcrqb5raoOtat06W5n4KFuWfU0%3D%3A0)
+![image-20220404193613984](doc/1.png)
 
+![image-20220404193639789](doc/2.png)
 
-
-![image-20220404193639789](https://one.zway.top/api/v3/file/source/130/image-20220404193639789_jMp.png?sign=2WiajeDF86-MadHkXjpew4SkQ3EXX4pGrAdVNgollAI%3D%3A0)
-
-![image-20220404194022449](https://one.zway.top/api/v3/file/source/131/image-20220404194022449_TUu.png?sign=X3smQ6mr2EySRw61RXngnLVpnuhTxBcQrIfSIHFPCOc%3D%3A0)
+![image-20220404194022449](doc/3.png)
 
 # 技术栈
 
