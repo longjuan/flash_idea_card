@@ -2,6 +2,8 @@
 
 本项目是基于spring cloud alibaba的看板工具平台项目
 
+测试：https://fic.zway.top/
+
 前端：https://github.com/longjuan/flash_idea_card_ui
 
 ![image-20220404193613984](doc/1.png)
