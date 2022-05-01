@@ -17,6 +17,7 @@ import top.zway.fic.kanban.service.SearchUpdateService;
 import top.zway.fic.web.exception.BizException;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author ZZJ
@@ -53,7 +54,8 @@ public class ColumnServiceImpl implements ColumnService {
         KanbanColumnDO kanbanColumnDO = new KanbanColumnDO(null, null,
                 kanbanColumnAo.getColumnTitle(), kanbanColumnAo.getKanbanId(), kanbanColumnAo.getUpdateUser(),
                 null, null);
-        kanbanColumnDO.setColumnOrder(lastOrder == null ? 1 : lastOrder + 1);
+        // 加减 9-11
+        kanbanColumnDO.setColumnOrder(lastOrder == null ? 1 : lastOrder + ThreadLocalRandom.current().nextDouble(2) + 9);
         // 插入
         int insert = columnDao.insert(kanbanColumnDO);
         // 更新缓存

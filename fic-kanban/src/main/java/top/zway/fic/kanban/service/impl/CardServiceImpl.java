@@ -17,6 +17,7 @@ import top.zway.fic.kanban.service.SearchUpdateService;
 import top.zway.fic.web.exception.BizException;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author ZZJ
@@ -48,7 +49,8 @@ public class CardServiceImpl implements CardService {
         // Do对象
         CardDO cardDO = new CardDO(null, null, null, cardAo.getColumnId(), cardAo.getKanbanId(),
                 cardAo.getContent(), false, cardAo.getUpdateUser(), null);
-        cardDO.setOrderInColumn(lastOrder == null ? 1 : lastOrder + 1);
+        // 加减 9-11
+        cardDO.setOrderInColumn(lastOrder == null ? 1 : lastOrder + ThreadLocalRandom.current().nextDouble(2) + 9);
         // 插入
         int insert = cardDao.insert(cardDO);
         // 更新缓存
