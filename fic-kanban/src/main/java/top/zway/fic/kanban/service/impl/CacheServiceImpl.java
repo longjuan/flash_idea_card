@@ -60,7 +60,8 @@ public class CacheServiceImpl implements CacheService {
         redisUtils.zRemoveRangeByScore(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId, 0,
                 System.currentTimeMillis() - RedisConstant.COOPERATING_KANBAN_STATISTIC_EXPIRE_SECOND * 1000);
         // 获取协作人数
-        return redisUtils.zRank(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId, userId) > 1;
+        // 协作人数大于1，则正在协作
+        return redisUtils.zZCard(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId) > 1;
     }
 
 
