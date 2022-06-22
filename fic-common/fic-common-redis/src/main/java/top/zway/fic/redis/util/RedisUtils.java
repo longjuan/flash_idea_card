@@ -1,14 +1,14 @@
 package top.zway.fic.redis.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -579,6 +579,327 @@ public class RedisUtils {
             e.printStackTrace();
             return new HashSet<>();
         }
+    }
+
+
+    // ------------------zSet 相关操作--------------------------------
+
+    /**
+     * 添加元素, 有序集合是按照元素的 score 值由小到大排列
+     *
+     * @param key   有序集合
+     * @param value 元素
+     * @param score 分数
+     * @return 添加成功返回 true, 添加失败返回 false
+     */
+    public Boolean zAdd(String key, Object value, double score) {
+        return redisTemplate.opsForZSet().add(key, value, score);
+    }
+
+    /**
+     * 添加多个元素到有序集合中
+     *
+     * @param key    有序集合
+     * @param values 多个元素值
+     * @return 有序集合长度
+     */
+    public Long zAdd(String key, Set<ZSetOperations.TypedTuple<Object>> values) {
+        return redisTemplate.opsForZSet().add(key, values);
+    }
+
+    /**
+     * 移除有序集合中的值
+     *
+     * @param key    有序集合
+     * @param values 要移除的值, 可以同时移除多个
+     * @return 有序集合长度
+     */
+    public Long zRemove(String key, Object... values) {
+        return redisTemplate.opsForZSet().remove(key, values);
+    }
+
+    /**
+     * 增加元素的 score 值，并返回增加后的值
+     *
+     * @param key   有序集合
+     * @param value 要增加的元素
+     * @param delta 增加的分数是多少
+     * @return 增加后的分数
+     */
+    public Double zIncrementScore(String key, Object value, double delta) {
+        return redisTemplate.opsForZSet().incrementScore(key, value, delta);
+    }
+
+    /**
+     * 返回元素在集合的排名,有序集合是按照元素的 score 值由小到大排列
+     *
+     * @param key   有序集合
+     * @param value 值
+     * @return 排名, 从小到大顺序, 0 表示第一位
+     */
+    public Long zRank(String key, Object value) {
+        return redisTemplate.opsForZSet().rank(key, value);
+    }
+
+    /**
+     * 返回元素在集合的排名,按元素的 score 值由大到小排列
+     *
+     * @param key   有序集合
+     * @param value 值
+     * @return 排名, 从大到小顺序
+     */
+    public Long zReverseRank(String key, Object value) {
+        return redisTemplate.opsForZSet().reverseRank(key, value);
+    }
+
+    /**
+     * 获取集合的元素, 从小到大排序
+     *
+     * @param key   有序集合
+     * @param start 开始位置
+     * @param end   结束位置, -1 表示从开始位置开始后面的所有元素
+     * @return 指定区间的值的集合
+     */
+    public Set<Object> zRange(String key, long start, long end) {
+        return redisTemplate.opsForZSet().range(key, start, end);
+    }
+
+    /**
+     * 获取集合元素, 并且把 score 值也获取
+     *
+     * @param key   有序集合
+     * @param start 开始位置
+     * @param end   结束位置, -1 表示从开始位置开始后面的所有元素
+     * @return 指定区间的元素及分数的元组的集合
+     */
+    public Set<ZSetOperations.TypedTuple<Object>> zRangeWithScores(String key, long start, long end) {
+        return redisTemplate.opsForZSet().rangeWithScores(key, start, end);
+    }
+
+    /**
+     * 根据 score 值查询集合元素
+     *
+     * @param key 有序集合
+     * @param min 最小值
+     * @param max 最大值
+     * @return 分数 在最小值与最大值之间的元素集合
+     */
+    public Set<Object> zRangeByScore(String key, double min, double max) {
+        return redisTemplate.opsForZSet().rangeByScore(key, min, max);
+    }
+
+    /**
+     * 根据 score 值查询集合元素及其分数, 并按分数从小到大排序
+     *
+     * @param key 有序集合
+     * @param min 最小值
+     * @param max 最大值
+     * @return 分数 在最小值与最大值之间的元素与分数的元组的集合
+     */
+    public Set<ZSetOperations.TypedTuple<Object>> zRangeByScoreWithScores(String key, double min, double max) {
+        return redisTemplate.opsForZSet().rangeByScoreWithScores(key, min, max);
+    }
+
+    /**
+     * 根据 score 值查询集合元素及其分数, 从小到大排序, 只获取 start 到 end 位置之间的结果
+     *
+     * @param key   有序集合
+     * @param min   最低分数
+     * @param max   最高分数
+     * @param start 开始位置
+     * @param end   结束位置
+     * @return 分数在 min 与 max 之间, 位置在 start 与 end 之间的元素与分数的元组的集合
+     */
+    public Set<ZSetOperations.TypedTuple<Object>> zRangeByScoreWithScores(String key, double min, double max, long start, long end) {
+        return redisTemplate.opsForZSet().rangeByScoreWithScores(key, min, max, start, end);
+    }
+
+    /**
+     * 获取集合的元素, 从大到小排序
+     *
+     * @param key   有序集合
+     * @param start 开始位置
+     * @param end   结束位置
+     * @return 按照 分数 倒序的元素集合
+     */
+    public Set<Object> zReverseRange(String key, long start, long end) {
+        return redisTemplate.opsForZSet().reverseRange(key, start, end);
+    }
+
+    /**
+     * 获取集合的元素, 从大到小排序, 并返回 score 值
+     *
+     * @param key   有序集合
+     * @param start 开始位置
+     * @param end   结束位置
+     * @return 指定区间的元素及其分数的元组的集合
+     */
+    public Set<ZSetOperations.TypedTuple<Object>> zReverseRangeWithScores(String key, long start, long end) {
+        return redisTemplate.opsForZSet().reverseRangeWithScores(key, start, end);
+    }
+
+    /**
+     * 根据 score 值查询集合元素, 从大到小排序
+     *
+     * @param key 有序集合
+     * @param min 分数最小值
+     * @param max 分数最大值
+     * @return 分数在 min 与 max 之间的元素的集合, 按分数倒序
+     */
+    public Set<Object> zReverseRangeByScore(String key, double min, double max) {
+        return redisTemplate.opsForZSet().reverseRangeByScore(key, min, max);
+    }
+
+    /**
+     * 根据 score 值查询集合元素, 从大到小排序
+     *
+     * @param key 有序集合
+     * @param min 分数最小值
+     * @param max 分数最大值
+     * @return 分数在 min 与 max 之间的元素与分数的元组的集合, 按分数倒序
+     */
+    public Set<ZSetOperations.TypedTuple<Object>> zReverseRangeByScoreWithScores(String key, double min, double max) {
+        return redisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, min, max);
+    }
+
+    /**
+     * 根据 score 值查询集合元素及其分数, 从小到大排序, 只获取 start 到 end 位置之间的结果, 按分数从小到大排序
+     *
+     * @param key   有序集合
+     * @param min   分数最小值
+     * @param max   分数最大值
+     * @param start 开始位置
+     * @param end   结束位置
+     * @return 分数在 min 与 max 之间, 位置在 start 与 end 之间的元素与分数的元组的集合, 按分数倒序
+     */
+    public Set<Object> zReverseRangeByScore(String key, double min, double max, long start, long end) {
+        return redisTemplate.opsForZSet().reverseRangeByScore(key, min, max, start, end);
+    }
+
+    /**
+     * 根据 score 值获取集合元素数量
+     *
+     * @param key 有序集合
+     * @param min 分数最小值
+     * @param max 分数最大值
+     * @return 分数在最小值与最大值之间的元素数量
+     */
+    public Long zCount(String key, double min, double max) {
+        return redisTemplate.opsForZSet().count(key, min, max);
+    }
+
+    /**
+     * 获取集合大小( 底层实现还是 zcard )
+     *
+     * @param key 有序集合
+     * @return 集合中的元素数量
+     */
+    public Long zSize(String key) {
+        return redisTemplate.opsForZSet().size(key);
+    }
+
+    /**
+     * 获取集合大小
+     *
+     * @param key 有序集合
+     * @return 集合中的元素数量
+     */
+    public Long zZCard(String key) {
+        return redisTemplate.opsForZSet().zCard(key);
+    }
+
+    /**
+     * 获取集合中 value 元素的 score 值
+     *
+     * @param key   有序集合
+     * @param value 元素值
+     * @return 该元素值的分数
+     */
+    public Double zScore(String key, Object value) {
+        return redisTemplate.opsForZSet().score(key, value);
+    }
+
+    /**
+     * 移除指定索引位置的成员
+     *
+     * @param key   有序集合
+     * @param start 开始位置
+     * @param end   结束位置
+     * @return 移除的元素个数
+     */
+    public Long zRemoveRange(String key, long start, long end) {
+        return redisTemplate.opsForZSet().removeRange(key, start, end);
+    }
+
+    /**
+     * 根据指定的 score 值的范围来移除成员
+     *
+     * @param key 有序集合
+     * @param min 分数最小值
+     * @param max 分数最大值
+     * @return 移除的元素个数
+     */
+    public Long zRemoveRangeByScore(String key, double min, double max) {
+        return redisTemplate.opsForZSet().removeRangeByScore(key, min, max);
+    }
+
+    /**
+     * 获取 key 和 otherKey 的并集并存储在 destKey 中
+     *
+     * @param key      集合1
+     * @param otherKey 集合2
+     * @param destKey  用于保存结果的集合
+     * @return 新集合的长度
+     */
+    public Long zUnionAndStore(String key, String otherKey, String destKey) {
+        return redisTemplate.opsForZSet().unionAndStore(key, otherKey, destKey);
+    }
+
+    /**
+     * 获取 key 和 otherKeys 的并集并存储在 destKey 中
+     *
+     * @param key       集合1
+     * @param otherKeys 其余多个集合
+     * @param destKey   用于保存结果的集合
+     * @return 新集合的长度
+     */
+    public Long zUnionAndStore(String key, Collection<String> otherKeys, String destKey) {
+        return redisTemplate.opsForZSet().unionAndStore(key, otherKeys, destKey);
+    }
+
+    /**
+     * 获取 key 和 otherKey 的交集并存储在 destKey 中
+     *
+     * @param key      集合1
+     * @param otherKey 集合2
+     * @param destKey  用于保存结果的集合
+     * @return 新集合的长度
+     */
+    public Long zIntersectAndStore(String key, String otherKey, String destKey) {
+        return redisTemplate.opsForZSet().intersectAndStore(key, otherKey, destKey);
+    }
+
+    /**
+     * 获取 key 和 otherKeys 的交集并存储在 destKey 中
+     *
+     * @param key       集合1
+     * @param otherKeys 其余多个集合
+     * @param destKey   用于保存结果的集合
+     * @return 新集合的长度
+     */
+    public Long zIntersectAndStore(String key, Collection<String> otherKeys, String destKey) {
+        return redisTemplate.opsForZSet().intersectAndStore(key, otherKeys, destKey);
+    }
+
+    /**
+     * 迭代有序集合
+     *
+     * @param key 有序集合
+     * @param options 迭代限制条件, 为 ScanOptions.NONE 则无限制
+     * @return 下一个元素及分数元组的游标
+     */
+    public Cursor<ZSetOperations.TypedTuple<Object>> zScan(String key, ScanOptions options) {
+        return redisTemplate.opsForZSet().scan(key, options);
     }
 
 }

@@ -13,7 +13,7 @@ public class RedisConstant {
 
     public static final String COOPERATING_KANBAN_STATISTIC = "STATISTIC:COOPERATING_KANBAN_";
 
-    public static final long COOPERATING_KANBAN_STATISTIC_EXPIRE_SECOND = 100L;
+    public static final long COOPERATING_KANBAN_STATISTIC_EXPIRE_SECOND = 300L;
 
     public static final String KANBAN_FULL_UPDATE_TIMER_PREFIX = "TIMER:KANBAN_FULL_UPDATE_";
 
