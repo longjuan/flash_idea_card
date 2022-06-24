@@ -51,9 +51,17 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public boolean isCooperating(Long kanbanId, Long userId) {
-        redisUtils.sSetAndTime(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId, RedisConstant.COOPERATING_KANBAN_STATISTIC_EXPIRE_SECOND, userId);
-        long num = redisUtils.sGetSetSize(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId);
-        return num > 1;
+        // 加入协作
+        redisUtils.zAdd(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId, userId, System.currentTimeMillis());
+        // 设置过期时间
+        redisUtils.expire(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId,
+                RedisConstant.COOPERATING_KANBAN_STATISTIC_EXPIRE_SECOND);
+        // 移除之前的协作信息
+        redisUtils.zRemoveRangeByScore(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId, 0,
+                System.currentTimeMillis() - RedisConstant.COOPERATING_KANBAN_STATISTIC_EXPIRE_SECOND * 1000);
+        // 获取协作人数
+        // 协作人数大于1，则正在协作
+        return redisUtils.zZCard(RedisConstant.COOPERATING_KANBAN_STATISTIC + kanbanId) > 1;
     }
 
 
