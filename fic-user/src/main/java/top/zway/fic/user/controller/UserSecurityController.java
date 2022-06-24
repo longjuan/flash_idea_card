@@ -9,6 +9,7 @@ import top.zway.fic.base.constant.PojoValidConstants;
 import top.zway.fic.base.constant.RegexConstant;
 import top.zway.fic.base.entity.dto.RegisterUserDTO;
 import top.zway.fic.base.result.R;
+import top.zway.fic.user.rpc.GuideInitRpcService;
 import top.zway.fic.user.service.UserSecurityService;
 import top.zway.fic.web.exception.Jsr303Checker;
 import top.zway.fic.web.holder.LoginUserHolder;

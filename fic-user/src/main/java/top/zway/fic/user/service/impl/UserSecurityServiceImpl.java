@@ -11,6 +11,7 @@ import top.zway.fic.base.entity.doo.UserInfoDO;
 import top.zway.fic.user.dao.RoleUserDao;
 import top.zway.fic.user.dao.UserDao;
 import top.zway.fic.user.dao.UserInfoDao;
+import top.zway.fic.user.rpc.GuideInitRpcService;
 import top.zway.fic.user.service.UserSecurityService;
 
 import java.util.Collections;
@@ -26,6 +27,8 @@ public class UserSecurityServiceImpl implements UserSecurityService {
     private final RoleUserDao roleUserDao;
     private final PasswordEncoder passwordEncoder;
     private final UserInfoDao userInfoDao;
+
+    private final GuideInitRpcService guideInitRpcService;
 
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
@@ -47,6 +50,8 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         // 插入用户信息
         UserInfoDO userInfoDO = new UserInfoDO(userDO.getId(), username, "");
         userInfoDao.insertUserInfo(userInfoDO);
+        // 初始化引导看板
+        guideInitRpcService.initGuide(userDO.getId());
         return true;
     }
 

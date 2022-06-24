@@ -29,8 +29,8 @@ public class KanbanDTO implements Serializable {
             message = "颜色错误")
     private String color;
 
-    @Range(min = PojoValidConstants.KANBAN_TYPE_MIN_LEN,
-            max = PojoValidConstants.KANBAN_TYPE_MAX_LEN,
+    @Range(min = PojoValidConstants.KANBAN_TYPE_MIN_VALUE,
+            max = PojoValidConstants.KANBAN_TYPE_MAX_VALUE,
             message = "看板类型错误")
     private Integer type;
 }
