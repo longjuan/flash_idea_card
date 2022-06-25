@@ -25,7 +25,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
                 // 放行公钥接口
                 .antMatchers("/rsa/publicKey").permitAll()
-                .anyRequest().authenticated();
+                .antMatchers("/auth/rsa").permitAll()
+                .antMatchers("/rpc/rsa/decrypt").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .csrf().disable();
     }
 
     @Bean

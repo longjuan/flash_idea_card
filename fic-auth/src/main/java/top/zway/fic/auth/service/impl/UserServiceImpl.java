@@ -1,4 +1,4 @@
-package top.zway.fic.auth.service;
+package top.zway.fic.auth.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;

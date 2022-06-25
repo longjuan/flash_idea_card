@@ -19,4 +19,8 @@ public class RedisConstant {
 
     public static final long KANBAN_FULL_UPDATE_TIMER_EXP_TIME = 60 * 20;
 
+    public static final String RSA_PRIVATE_KEY = "RSA:PRIVATE_KEY_";
+
+    public static final long RSA_PUBLIC_KEY_EXP_TIME = 60 * 10;
+
 }
