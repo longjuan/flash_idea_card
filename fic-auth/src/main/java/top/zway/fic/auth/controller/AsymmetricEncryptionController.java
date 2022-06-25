@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import top.zway.fic.auth.service.AsymmetricEncryptionService;
 import top.zway.fic.base.entity.vo.RsaKeyVO;
+import top.zway.fic.base.result.R;
 
 /**
  * @author ZZJ
@@ -22,9 +23,9 @@ public class AsymmetricEncryptionController {
     private final AsymmetricEncryptionService asymmetricEncryptionService;
 
     @ApiOperation("生成rsa密钥对，并返回公钥和uuid")
-    @GetMapping("/auth/rsa")
-    public RsaKeyVO generateKeyPair() {
-        return asymmetricEncryptionService.generateKeyPair();
+    @GetMapping("/oauth/rsa")
+    public R<RsaKeyVO> generateKeyPair() {
+        return R.success(asymmetricEncryptionService.generateKeyPair());
     }
 
     @ApiOperation("rpc，用uuid解密内容")

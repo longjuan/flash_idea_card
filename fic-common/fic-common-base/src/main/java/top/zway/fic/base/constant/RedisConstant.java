@@ -23,4 +23,8 @@ public class RedisConstant {
 
     public static final long RSA_PUBLIC_KEY_EXP_TIME = 60 * 10;
 
+    public static final String CAPTCHA_CODE = "CAPTCHA:CODE_";
+
+    public static final long CAPTCHA_CODE_EXP_TIME = 60 * 10;
+
 }

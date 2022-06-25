@@ -27,6 +27,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rsa/publicKey").permitAll()
                 .antMatchers("/auth/rsa").permitAll()
                 .antMatchers("/rpc/rsa/decrypt").permitAll()
+                .antMatchers("/captcha").permitAll()
+                .antMatchers("/rpc/captcha/validate").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .csrf().disable();

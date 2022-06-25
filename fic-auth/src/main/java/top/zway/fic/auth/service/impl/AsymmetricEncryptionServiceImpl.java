@@ -29,8 +29,7 @@ public class AsymmetricEncryptionServiceImpl implements AsymmetricEncryptionServ
     public RsaKeyVO generateKeyPair() {
         RSA rsa = new RSA();
         String uuid = IdUtil.simpleUUID();
-        redisUtils.set(RedisConstant.RSA_PRIVATE_KEY + uuid, rsa.getPrivateKeyBase64());
-        redisUtils.expire(RedisConstant.RSA_PRIVATE_KEY + uuid, RedisConstant.RSA_PUBLIC_KEY_EXP_TIME);
+        redisUtils.set(RedisConstant.RSA_PRIVATE_KEY + uuid, rsa.getPrivateKeyBase64(), RedisConstant.RSA_PUBLIC_KEY_EXP_TIME);
         return new RsaKeyVO(rsa.getPublicKeyBase64(), uuid);
     }
 
