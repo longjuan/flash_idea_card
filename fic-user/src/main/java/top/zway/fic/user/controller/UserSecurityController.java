@@ -9,7 +9,8 @@ import top.zway.fic.base.constant.PojoValidConstants;
 import top.zway.fic.base.constant.RegexConstant;
 import top.zway.fic.base.entity.dto.RegisterUserDTO;
 import top.zway.fic.base.result.R;
-import top.zway.fic.user.rpc.GuideInitRpcService;
+import top.zway.fic.user.rpc.ReCaptchaRpcService;
+import top.zway.fic.user.rpc.RsaRpcService;
 import top.zway.fic.user.service.UserSecurityService;
 import top.zway.fic.web.exception.Jsr303Checker;
 import top.zway.fic.web.holder.LoginUserHolder;
@@ -26,12 +27,22 @@ import javax.validation.Valid;
 public class UserSecurityController {
     private final UserSecurityService userSecurityService;
     private final LoginUserHolder loginUserHolder;
+    private final ReCaptchaRpcService reCaptchaRpcService;
+    private final RsaRpcService rsaRpcService;
 
     @PostMapping("/register")
     @ApiOperation("新用户注册")
     public R registerNewUser(@Valid @RequestBody RegisterUserDTO registerUserDTO, BindingResult bindingResult) {
         Jsr303Checker.check(bindingResult);
-        boolean success = userSecurityService.registerNewUser(registerUserDTO.getUsername(), registerUserDTO.getPassword());
+        Boolean verify = reCaptchaRpcService.verify(registerUserDTO.getCaptcha());
+        if (!verify) {
+            return R.failed("验证失败");
+        }
+        String decrypt = rsaRpcService.decrypt(registerUserDTO.getRsaUuid(), registerUserDTO.getPassword());
+        if (decrypt == null) {
+            return R.failed("解密失败");
+        }
+        boolean success = userSecurityService.registerNewUser(registerUserDTO.getUsername(), decrypt);
         return R.judge(success,"邮箱已存在");
     }
 

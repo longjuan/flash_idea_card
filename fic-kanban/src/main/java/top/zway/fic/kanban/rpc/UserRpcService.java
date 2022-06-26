@@ -11,7 +11,7 @@ import java.util.HashMap;
 /**
  * @author ZZJ
  */
-@FeignClient("fic-user")
+@FeignClient(name = "fic-user", contextId = "userRpcService", fallback = UserRpcServiceFallback.class)
 public interface UserRpcService {
     @PostMapping("/rpc/userinfo/list")
     public R<HashMap<Long, UserInfoDO>> getUserInfoDoByList(@RequestParam("userIds") Long[] userIds);

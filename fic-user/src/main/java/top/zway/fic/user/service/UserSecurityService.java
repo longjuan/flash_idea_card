@@ -8,7 +8,7 @@ public interface UserSecurityService {
      * 注册新用户
      * @param username 用户名
      * @param password 密码
-     * @return 是否成功
+     * @return 异常信息，成功返回null
      */
     boolean registerNewUser(String username, String password);
 

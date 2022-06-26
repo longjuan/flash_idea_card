@@ -20,8 +20,13 @@ public class RegisterUserDTO implements Serializable {
     @Email(message = "邮箱格式错误")
     @NotBlank(message = "邮箱不能为空")
     private String username;
-
-    @Size(min = PojoValidConstants.PASSWORD_MIN_LEN, max = PojoValidConstants.PASSWORD_MAX_LEN, message = "密码长度应在6-50之间")
+    
     @NotBlank(message = "密码不能为空")
     private String password;
+
+    @NotBlank(message = "请先完成验证")
+    private String captcha;
+
+    @NotBlank(message = "请携带rsa的uuid")
+    private String rsaUuid;
 }

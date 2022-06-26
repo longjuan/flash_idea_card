@@ -1,6 +1,5 @@
 package top.zway.fic.auth.service.impl;
 
-import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -13,8 +12,6 @@ import top.zway.fic.auth.service.AsymmetricEncryptionService;
 import top.zway.fic.base.constant.RedisConstant;
 import top.zway.fic.base.entity.vo.RsaKeyVO;
 import top.zway.fic.redis.util.RedisUtils;
-
-import java.util.Arrays;
 
 /**
  * @author ZZJ
@@ -35,12 +32,16 @@ public class AsymmetricEncryptionServiceImpl implements AsymmetricEncryptionServ
 
     @Override
     public String decrypt(String uuid, String content) {
-        Object obj = redisUtils.get(RedisConstant.RSA_PRIVATE_KEY + uuid);
-        redisUtils.del(RedisConstant.RSA_PRIVATE_KEY + uuid);
-        if (obj instanceof String) {
-            String privateKey = (String) obj;
-            RSA rsa = new RSA(privateKey, null);
-            return StrUtil.str(rsa.decrypt(content, KeyType.PrivateKey), CharsetUtil.CHARSET_UTF_8);
+        try {
+            Object obj = redisUtils.get(RedisConstant.RSA_PRIVATE_KEY + uuid);
+            redisUtils.del(RedisConstant.RSA_PRIVATE_KEY + uuid);
+            if (obj instanceof String) {
+                String privateKey = (String) obj;
+                RSA rsa = new RSA(privateKey, null);
+                return StrUtil.str(rsa.decrypt(content, KeyType.PrivateKey), CharsetUtil.CHARSET_UTF_8);
+            }
+        }catch (Exception e){
+            log.info("解密失败，uuid：{}，异常信息：{}", uuid, e.getMessage());
         }
         return null;
     }
