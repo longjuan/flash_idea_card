@@ -32,27 +32,29 @@ public class AuthController {
     private final AsymmetricEncryptionService asymmetricEncryptionService;
 
     @PostMapping("/oauth/token")
-    public Object postAccessToken(
+    public R postAccessToken(
             Principal principal,
             @RequestParam Map<String, String> parameters
     ) throws HttpRequestMethodNotSupportedException {
-        String captchaCode = parameters.get(AuthConstant.CAPTCHA_CODE_KEY);
-        if (captchaCode == null) {
-            return R.failed("请先验证验证码");
+        if (AuthConstant.GRANT_TYPE_PASSWORD.equals(parameters.get(AuthConstant.GRANT_TYPE))) {
+            String captchaCode = parameters.get(AuthConstant.CAPTCHA_CODE_KEY);
+            if (captchaCode == null) {
+                return R.failed("请先验证验证码");
+            }
+            if (!reCaptchaVerificationService.verify(captchaCode)) {
+                return R.failed("验证失败");
+            }
+            String rsaUuid = parameters.get(AuthConstant.RSA_UUID_KEY);
+            String password = parameters.get(AuthConstant.PASSWORD_KEY);
+            if (rsaUuid == null || password == null) {
+                return R.failed("密码不能为空");
+            }
+            String decryptPassword = asymmetricEncryptionService.decrypt(rsaUuid, password, true);
+            if (decryptPassword == null) {
+                return R.failed("密码解析错误");
+            }
+            parameters.put(AuthConstant.PASSWORD_KEY, decryptPassword);
         }
-        if (!reCaptchaVerificationService.verify(captchaCode)) {
-            return R.failed("验证失败");
-        }
-        String rsaUuid = parameters.get(AuthConstant.RSA_UUID_KEY);
-        String password = parameters.get(AuthConstant.PASSWORD_KEY);
-        if (rsaUuid == null || password == null) {
-            return R.failed("密码不能为空");
-        }
-        String decryptPassword = asymmetricEncryptionService.decrypt(rsaUuid, password);
-        if (decryptPassword == null) {
-            return R.failed("密码解析错误");
-        }
-        parameters.put(AuthConstant.PASSWORD_KEY, decryptPassword);
         OAuth2AccessToken accessToken = tokenEndpoint.postAccessToken(principal, parameters).getBody();
         return R.success(accessToken);
     }

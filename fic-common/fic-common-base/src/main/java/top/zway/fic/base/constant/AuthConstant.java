@@ -48,4 +48,14 @@ public class AuthConstant {
      * 密码key
      */
     public static final String PASSWORD_KEY = "password";
+
+    /**
+     * 授权类型GRANT_TYPE
+     */
+    public static final String GRANT_TYPE = "grant_type";
+
+    /**
+     * 密码登录grant_type
+     */
+    public static final String GRANT_TYPE_PASSWORD = "password";
 }

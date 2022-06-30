@@ -16,7 +16,8 @@ public interface AsymmetricEncryptionService {
      * 用uuid解密内容
      * @param uuid uuid
      * @param content 内容
+     * @param needDelete 是否删除私钥
      * @return 解密后的内容
      */
-    String decrypt(String uuid, String content);
+    String decrypt(String uuid, String content, boolean needDelete);
 }

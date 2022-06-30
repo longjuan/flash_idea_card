@@ -35,10 +35,10 @@ public class UserSecurityController {
     public R registerNewUser(@Valid @RequestBody RegisterUserDTO registerUserDTO, BindingResult bindingResult) {
         Jsr303Checker.check(bindingResult);
         Boolean verify = reCaptchaRpcService.verify(registerUserDTO.getCaptcha());
-        if (!verify) {
+        if (verify == null || !verify) {
             return R.failed("验证失败");
         }
-        String decrypt = rsaRpcService.decrypt(registerUserDTO.getRsaUuid(), registerUserDTO.getPassword());
+        String decrypt = rsaRpcService.decrypt(registerUserDTO.getRsaUuid(), registerUserDTO.getPassword(), true);
         if (decrypt == null) {
             return R.failed("解密失败");
         }
@@ -48,12 +48,20 @@ public class UserSecurityController {
 
     @PutMapping("/password")
     @ApiOperation("修改密码")
-    public R updatePassword(String oldpw, String newpd){
-        if (newpd.length() < PojoValidConstants.PASSWORD_MIN_LEN || newpd.length() > PojoValidConstants.PASSWORD_MAX_LEN){
+    public R updatePassword(@RequestParam("oldpw") String oldpw, @RequestParam("newpw") String newpw, @RequestParam("rsaUuid") String rsaUuid) {
+        if (oldpw == null || newpw == null || rsaUuid == null) {
+            return R.failed("参数不能为空");
+        }
+        newpw = rsaRpcService.decrypt(rsaUuid, newpw, false);
+        oldpw = rsaRpcService.decrypt(rsaUuid, oldpw, true);
+        if (newpw == null || oldpw == null) {
+            return R.failed("解密失败");
+        }
+        if (newpw.length() < PojoValidConstants.PASSWORD_MIN_LEN || newpw.length() > PojoValidConstants.PASSWORD_MAX_LEN){
             return R.failed("密码长度应在6-50之间");
         }
         Long id = loginUserHolder.getCurrentUser().getId();
-        boolean success = userSecurityService.updatePassword(oldpw, newpd, id);
+        boolean success = userSecurityService.updatePassword(oldpw, newpw, id);
         return R.judge(success,"旧密码不正确");
     }
 

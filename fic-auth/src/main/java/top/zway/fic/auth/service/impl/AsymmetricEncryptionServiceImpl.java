@@ -31,10 +31,12 @@ public class AsymmetricEncryptionServiceImpl implements AsymmetricEncryptionServ
     }
 
     @Override
-    public String decrypt(String uuid, String content) {
+    public String decrypt(String uuid, String content, boolean needDelete) {
         try {
             Object obj = redisUtils.get(RedisConstant.RSA_PRIVATE_KEY + uuid);
-            redisUtils.del(RedisConstant.RSA_PRIVATE_KEY + uuid);
+            if (needDelete){
+                redisUtils.del(RedisConstant.RSA_PRIVATE_KEY + uuid);
+            }
             if (obj instanceof String) {
                 String privateKey = (String) obj;
                 RSA rsa = new RSA(privateKey, null);
