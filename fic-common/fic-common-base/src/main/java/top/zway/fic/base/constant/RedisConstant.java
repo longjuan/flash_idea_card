@@ -23,4 +23,10 @@ public class RedisConstant {
 
     public static final long RSA_PUBLIC_KEY_EXP_TIME = 60 * 10;
 
+    public static final String EMAIL_VERIFICATION_CODE_PREFIX = "VERIFICATION_CODE:EMAIL_";
+
+    public static final long EMAIL_VERIFICATION_CODE_EXP_TIME = 60 * 6;
+
+    public static final long EMAIL_VERIFICATION_CODE_SEND_INTERVAL_MILLISECOND = 60 * 1000;
+
 }
