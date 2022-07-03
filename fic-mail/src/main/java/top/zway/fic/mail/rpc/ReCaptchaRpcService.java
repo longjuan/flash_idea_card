@@ -1,4 +1,4 @@
-package top.zway.fic.user.rpc;
+package top.zway.fic.mail.rpc;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

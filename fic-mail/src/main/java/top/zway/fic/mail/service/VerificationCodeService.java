@@ -8,9 +8,10 @@ public interface VerificationCodeService {
      * 发送验证码
      *
      * @param email 邮箱
-     * @return 验证码
+     * @param captcha 人机验证码
+     * @return 失败信息
      */
-    boolean sendVerificationCode(String email);
+    String sendVerificationCode(String email, String captcha);
 
     /**
      * 校验验证码

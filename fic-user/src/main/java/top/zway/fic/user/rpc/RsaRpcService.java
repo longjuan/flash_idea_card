@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(contextId = "rsaRpcService", name = "fic-auth", fallback = RsaRpcServiceFallback.class)
 public interface RsaRpcService {
     @PostMapping("/rpc/rsa/decrypt")
-    public String decrypt(@RequestParam("uuid") String uuid, @RequestParam("content") String content,
+    String decrypt(@RequestParam("uuid") String uuid, @RequestParam("content") String content,
                           @RequestParam("needDelete") boolean needDelete);
 }

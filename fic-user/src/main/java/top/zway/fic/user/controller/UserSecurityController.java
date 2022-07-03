@@ -9,6 +9,7 @@ import top.zway.fic.base.constant.PojoValidConstants;
 import top.zway.fic.base.constant.RegexConstant;
 import top.zway.fic.base.entity.dto.RegisterUserDTO;
 import top.zway.fic.base.result.R;
+import top.zway.fic.user.rpc.MailRpcService;
 import top.zway.fic.user.rpc.ReCaptchaRpcService;
 import top.zway.fic.user.rpc.RsaRpcService;
 import top.zway.fic.user.service.UserSecurityService;
@@ -27,16 +28,16 @@ import javax.validation.Valid;
 public class UserSecurityController {
     private final UserSecurityService userSecurityService;
     private final LoginUserHolder loginUserHolder;
-    private final ReCaptchaRpcService reCaptchaRpcService;
     private final RsaRpcService rsaRpcService;
+    private final MailRpcService mailRpcService;
 
     @PostMapping("/register")
     @ApiOperation("新用户注册")
     public R registerNewUser(@Valid @RequestBody RegisterUserDTO registerUserDTO, BindingResult bindingResult) {
         Jsr303Checker.check(bindingResult);
-        Boolean verify = reCaptchaRpcService.verify(registerUserDTO.getCaptcha());
+        Boolean verify = mailRpcService.verifyVerificationCode(registerUserDTO.getUsername(), registerUserDTO.getVerifyCode());
         if (verify == null || !verify) {
-            return R.failed("验证失败");
+            return R.failed("邮件验证码错误或已过期");
         }
         String decrypt = rsaRpcService.decrypt(registerUserDTO.getRsaUuid(), registerUserDTO.getPassword(), true);
         if (decrypt == null) {

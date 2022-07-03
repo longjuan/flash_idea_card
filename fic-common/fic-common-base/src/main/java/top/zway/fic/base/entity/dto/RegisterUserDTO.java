@@ -24,8 +24,8 @@ public class RegisterUserDTO implements Serializable {
     @NotBlank(message = "密码不能为空")
     private String password;
 
-    @NotBlank(message = "请先完成验证")
-    private String captcha;
+    @NotBlank(message = "请输入邮件验证码")
+    private String verifyCode;
 
     @NotBlank(message = "请携带rsa的uuid")
     private String rsaUuid;

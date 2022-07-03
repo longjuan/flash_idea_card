@@ -11,6 +11,7 @@ import org.springframework.util.ResourceUtils;
 import top.zway.fic.base.constant.RabbitMqConstants;
 import top.zway.fic.base.constant.RedisConstant;
 import top.zway.fic.base.entity.bo.MailMessageBO;
+import top.zway.fic.mail.rpc.ReCaptchaRpcService;
 import top.zway.fic.mail.service.VerificationCodeService;
 import top.zway.fic.redis.util.RedisUtils;
 
@@ -36,6 +37,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     private final RedisUtils redisUtils;
     private final RabbitTemplate rabbitTemplate;
+    private final ReCaptchaRpcService reCaptchaRpcService;
 
     private static String VERIFICATION_CODE_MAIL_TEMPLATE;
 
@@ -48,13 +50,18 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     }
 
     @Override
-    public boolean sendVerificationCode(String email) {
+    public String sendVerificationCode(String email, String captcha) {
         // 检查发送间隔
         Set<ZSetOperations.TypedTuple<Object>> typedTuples = redisUtils.zReverseRangeByScoreWithScores(RedisConstant.EMAIL_VERIFICATION_CODE_PREFIX + email,
                 System.currentTimeMillis() - RedisConstant.EMAIL_VERIFICATION_CODE_SEND_INTERVAL_MILLISECOND,
                 System.currentTimeMillis());
         if (typedTuples == null || typedTuples.size() > 0) {
-            return false;
+            return "发送间隔太短，请稍后再试";
+        }
+        // 检查captcha
+        Boolean verify = reCaptchaRpcService.verify(captcha);
+        if (verify == null || !verify) {
+            return "人机身份验证失败，请重新完成验证";
         }
         // 生成验证码
         int code = ThreadLocalRandom.current().nextInt(999999);
@@ -68,7 +75,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         // rabbitmq写入
         rabbitTemplate.convertAndSend(RabbitMqConstants.MAIL_SEND_EXCHANGE_NAME, "", mailMessage);
         log.info("邮箱验证码：code: {}, email: {}", codeFormat, email);
-        return true;
+        return null;
     }
 
     @Override
