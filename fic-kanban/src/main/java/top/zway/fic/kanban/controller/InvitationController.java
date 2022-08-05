@@ -27,7 +27,7 @@ public class InvitationController {
     public R sendInvitation(@RequestParam("kanbanId") Long kanbanId, @RequestParam("invitedUser") String invitedUser) {
         Long id = loginUserHolder.getCurrentUser().getId();
         boolean success = invitationService.invite(invitedUser, kanbanId, id);
-        return R.judge(success, "邮箱不存在或无权限邀请");
+        return R.judge(success, "邮箱不存在或已在看板中");
     }
 
     @GetMapping("")
@@ -40,9 +40,15 @@ public class InvitationController {
 
     @PutMapping("")
     @ApiOperation("同意邀请")
-    public R accept(@RequestParam("invitationId") Long invitationId){
+    public R accept(@RequestParam("invitationId") Long invitationId,
+                    @RequestParam(name = "accept", defaultValue = "true") boolean accept) {
         Long id = loginUserHolder.getCurrentUser().getId();
-        boolean accept = invitationService.accept(invitationId, id);
-        return R.judge(accept, "加入失败，看板可能已被删除");
+        boolean success;
+        if (accept) {
+            success = invitationService.accept(invitationId, id);
+        } else {
+            success = invitationService.reject(invitationId, id);
+        }
+        return R.judge(success, "失败，看板可能已被删除");
     }
 }

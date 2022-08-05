@@ -89,7 +89,10 @@ public class KanbanServiceImpl implements KanbanService {
         KanbanDO record = new KanbanDO(kanbanAo.getKanbanId(), kanbanAo.getOwnerId(), kanbanAo.getTitle(),
                 null, kanbanAo.getColor(), null, null);
         int update = kanbanDao.updateBaseInfo(record);
+        // 搜索更新
         searchUpdateService.update(new SearchUpdateBO(kanbanAo.getKanbanId(), SearchUpdateBO.UpdateTypeEnum.KANBAN, kanbanAo.getKanbanId()));
+        // 缓存刷新
+        cacheService.doubleDelayedDeleteKanbanCache(kanbanAo.getKanbanId());
         return update > 0;
     }
 

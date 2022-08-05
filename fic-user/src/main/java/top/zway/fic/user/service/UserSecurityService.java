@@ -35,4 +35,12 @@ public interface UserSecurityService {
      * @return userid
      */
     Long getUserId(String email);
+
+    /**
+     * 重置密码
+     * @param email 用户名（邮箱）
+     * @param password 密码
+     * @return 是否成功
+     */
+    boolean resetPassword(String email, String password);
 }

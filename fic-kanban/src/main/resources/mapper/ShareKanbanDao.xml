@@ -24,6 +24,11 @@
         delete from share_kanban
         where kanban_id = #{kanbanId}
     </delete>
+    <delete id="deleteShare">
+        delete from share_kanban
+        where kanban_id = #{kanbanId}
+          and userid = #{userId}
+    </delete>
     <select id="countHaveJoinedUser" resultType="java.lang.Integer">
         SELECT
             count( kanban_id )

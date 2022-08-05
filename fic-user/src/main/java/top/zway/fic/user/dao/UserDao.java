@@ -52,4 +52,12 @@ public interface UserDao {
      * @return 用户id
      */
     Long getUserId(@Param("username") String username);
+
+    /**
+     * 修改密码
+     * @param password 新密码
+     * @param username 用户名（邮箱）
+     * @return 数量
+     */
+    int updatePasswordByUsername(@Param("password") String password,@Param("username") String username);
 }

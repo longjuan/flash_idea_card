@@ -78,4 +78,9 @@ public class UserSecurityServiceImpl implements UserSecurityService {
     public Long getUserId(String email) {
         return userDao.getUserId(email);
     }
+
+    @Override
+    public boolean resetPassword(String email, String password) {
+        return userDao.updatePasswordByUsername(passwordEncoder.encode(password), email) > 0;
+    }
 }

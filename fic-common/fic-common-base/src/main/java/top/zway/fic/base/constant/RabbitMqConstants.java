@@ -48,4 +48,12 @@ public class RabbitMqConstants {
      * 邮件发送队列名称
      */
     public static final String MAIL_SEND_QUEUE_NAME = "mail.send.queue";
+    /**
+     * 邀请提醒交换机名称
+     */
+    public static final String INVITATION_REMINDER_EXCHANGE_NAME = "invitation_reminder_fanout_exchange";
+    /**
+     * 邀请提醒队列名称
+     */
+    public static final String INVITATION_REMINDER_QUEUE_NAME = "invitation.reminder.queue";
 }

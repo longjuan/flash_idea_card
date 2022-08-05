@@ -66,6 +66,23 @@ public class UserSecurityController {
         return R.judge(success,"旧密码不正确");
     }
 
+    @PutMapping("/password/reset")
+    @ApiOperation("重置密码")
+    public R resetPassword(@Valid @RequestBody RegisterUserDTO registerUserDTO, BindingResult bindingResult) {
+        Jsr303Checker.check(bindingResult);
+        Boolean verify = mailRpcService.verifyVerificationCode(registerUserDTO.getUsername(), registerUserDTO.getVerifyCode());
+        if (verify == null || !verify) {
+            return R.failed("邮件验证码错误或已过期");
+        }
+        String decrypt = rsaRpcService.decrypt(registerUserDTO.getRsaUuid(), registerUserDTO.getPassword(), true);
+        if (decrypt == null) {
+            return R.failed("解密失败");
+        }
+        boolean success = userSecurityService.resetPassword(registerUserDTO.getUsername(), decrypt);
+        return R.judge(success,"邮箱未注册");
+    }
+
+
     @PutMapping("/email")
     @ApiOperation("修改邮箱(用户名)")
     public R updateEmail(String email){

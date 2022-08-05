@@ -44,4 +44,12 @@ public interface InvitationDao {
      * @return 数量
      */
     int updateState(@Param("userId") Long userId, @Param("kanbanId") Long kanbanId, @Param("state") Integer state);
+
+    /**
+     * 更新状态
+     * @param invitationId 邀请id
+     * @param state 状态
+     * @return 数量
+     */
+    int updateStateById(@Param("invitationId") Long invitationId, @Param("state") Integer state);
 }

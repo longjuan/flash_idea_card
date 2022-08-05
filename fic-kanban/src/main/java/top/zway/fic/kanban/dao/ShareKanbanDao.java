@@ -71,4 +71,11 @@ public interface ShareKanbanDao {
      */
     int updateCollectState(@Param("kanbanId") Long kanbanId, @Param("userId") Long userId, @Param("collected") Boolean collected);
 
+    /**
+     * 退出协作
+     * @param kanbanId 看板
+     * @param userId 用户
+     * @return 数量
+     */
+    int deleteShare(@Param("kanbanId")Long kanbanId, @Param("userId")Long userId);
 }
