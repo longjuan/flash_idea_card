@@ -15,7 +15,7 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
-import top.zway.fic.auth.service.UserServiceImpl;
+import top.zway.fic.auth.service.impl.UserServiceImpl;
 import top.zway.fic.base.constant.AuthConstant;
 
 import java.security.KeyPair;

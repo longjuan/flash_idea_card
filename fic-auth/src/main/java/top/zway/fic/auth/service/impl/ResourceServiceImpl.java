@@ -1,4 +1,4 @@
-package top.zway.fic.auth.service;
+package top.zway.fic.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import top.zway.fic.auth.service.AsymmetricEncryptionService;
+import top.zway.fic.auth.service.ReCaptchaVerificationService;
+import top.zway.fic.base.constant.AuthConstant;
 import top.zway.fic.base.result.R;
 
 import java.security.Principal;
@@ -25,13 +28,33 @@ import java.util.Map;
 public class AuthController {
 
     private final TokenEndpoint tokenEndpoint;
+    private final ReCaptchaVerificationService reCaptchaVerificationService;
+    private final AsymmetricEncryptionService asymmetricEncryptionService;
 
     @PostMapping("/oauth/token")
-    public Object postAccessToken(
+    public R postAccessToken(
             Principal principal,
             @RequestParam Map<String, String> parameters
     ) throws HttpRequestMethodNotSupportedException {
-        // XXX 登录验证码 暂不实现
+        if (AuthConstant.GRANT_TYPE_PASSWORD.equals(parameters.get(AuthConstant.GRANT_TYPE))) {
+            String captchaCode = parameters.get(AuthConstant.CAPTCHA_CODE_KEY);
+            if (captchaCode == null) {
+                return R.failed("请先验证验证码");
+            }
+            if (!reCaptchaVerificationService.verify(captchaCode)) {
+                return R.failed("验证失败");
+            }
+            String rsaUuid = parameters.get(AuthConstant.RSA_UUID_KEY);
+            String password = parameters.get(AuthConstant.PASSWORD_KEY);
+            if (rsaUuid == null || password == null) {
+                return R.failed("密码不能为空");
+            }
+            String decryptPassword = asymmetricEncryptionService.decrypt(rsaUuid, password, true);
+            if (decryptPassword == null) {
+                return R.failed("密码解析错误");
+            }
+            parameters.put(AuthConstant.PASSWORD_KEY, decryptPassword);
+        }
         OAuth2AccessToken accessToken = tokenEndpoint.postAccessToken(principal, parameters).getBody();
         return R.success(accessToken);
     }

@@ -8,7 +8,7 @@ public interface UserSecurityService {
      * 注册新用户
      * @param username 用户名
      * @param password 密码
-     * @return 是否成功
+     * @return 异常信息，成功返回null
      */
     boolean registerNewUser(String username, String password);
 
@@ -35,4 +35,12 @@ public interface UserSecurityService {
      * @return userid
      */
     Long getUserId(String email);
+
+    /**
+     * 重置密码
+     * @param email 用户名（邮箱）
+     * @param password 密码
+     * @return 是否成功
+     */
+    boolean resetPassword(String email, String password);
 }

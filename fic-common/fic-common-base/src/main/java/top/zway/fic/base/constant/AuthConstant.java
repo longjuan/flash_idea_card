@@ -33,4 +33,29 @@ public class AuthConstant {
      * 请求头开头
      */
     public static final String TOKEN_REQUEST_HEADER_START_WITH = "Bearer ";
+
+    /**
+     * 验证码key
+     */
+    public static final String CAPTCHA_CODE_KEY = "captcha";
+
+    /**
+     * rsa uuid key
+     */
+    public static final String RSA_UUID_KEY = "rsa_uuid";
+
+    /**
+     * 密码key
+     */
+    public static final String PASSWORD_KEY = "password";
+
+    /**
+     * 授权类型GRANT_TYPE
+     */
+    public static final String GRANT_TYPE = "grant_type";
+
+    /**
+     * 密码登录grant_type
+     */
+    public static final String GRANT_TYPE_PASSWORD = "password";
 }

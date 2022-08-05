@@ -31,4 +31,12 @@ public interface InvitationService {
      * @return 成功
      */
     boolean accept(Long invitationId, Long userid);
+
+    /**
+     * 拒绝邀请
+     * @param invitationId 邀请id
+     * @param userid 用户
+     * @return 成功
+     */
+    boolean reject(Long invitationId, Long id);
 }

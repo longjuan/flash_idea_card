@@ -84,4 +84,12 @@ public class KanbanController {
         boolean success = shareKanbanService.updateCollectState(kanbanId, id, isCollected);
         return R.judge(success);
     }
+
+    @DeleteMapping("/share")
+    @ApiOperation("退出协作")
+    public R deleteShare(@RequestParam("kanbanId") Long kanbanId, @RequestParam("userId") Long userId){
+        Long actionUserId = loginUserHolder.getCurrentUser().getId();
+        boolean success = shareKanbanService.deleteShare(kanbanId, userId, actionUserId);
+        return R.judge(success);
+    }
 }

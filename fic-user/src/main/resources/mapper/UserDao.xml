@@ -20,6 +20,12 @@
         WHERE
             id = #{id}
     </update>
+    <update id="updatePasswordByUsername">
+        UPDATE `user`
+        SET `password` = #{password}
+        WHERE
+            username = #{username}
+    </update>
     <select id="countUsername" resultType="java.lang.Integer">
         SELECT
             COUNT( `username` )

@@ -7,6 +7,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import top.zway.fic.base.constant.RabbitMqConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,31 +17,22 @@ import java.util.Map;
  */
 @Configuration
 public class SearchUpdateRabbitMqConfig {
-    public static final String DATA_UPDATE_EXCHANGE_NAME = "data_update_fanout_exchange";
-    public static final String DATA_UPDATE_QUEUE_NAME = "data.update.queue";
-    public static final String FULL_UPDATE_TTL_QUEUE_NAME = "full.update.ttl.queue";
-    public static final String FULL_UPDATE_DEAD_EXCHANGE_NAME = "full_update_dead_fanout_exchange";
-    public static final String FULL_UPDATE_DEAD_QUEUE_NAME = "full.update.dead.queue";
-    public static final int TTL_MILLISECOND = 1000 * 60 * 30;
-    public static final String FULL_UPDATE_TTL_EXCHANGE_NAME = "full_update_ttl_fanout_exchange";
-    public static final int WAITING_MAX_LENGTH = 10000;
-    public static final int FULL_UPDATE_WAITING_MAX_LENGTH = 1000;
 
     // 声明交换机
 
     @Bean
     public FanoutExchange dataUpdateExchange() {
-        return new FanoutExchange(DATA_UPDATE_EXCHANGE_NAME, true, false);
+        return new FanoutExchange(RabbitMqConstants.DATA_UPDATE_EXCHANGE_NAME, true, false);
     }
 
     @Bean
     public FanoutExchange fullUpdateDeadExchange() {
-        return new FanoutExchange(FULL_UPDATE_DEAD_EXCHANGE_NAME, true, false);
+        return new FanoutExchange(RabbitMqConstants.FULL_UPDATE_DEAD_EXCHANGE_NAME, true, false);
     }
 
     @Bean
     public FanoutExchange fullUpdateTTLExchange() {
-        return new FanoutExchange(FULL_UPDATE_TTL_EXCHANGE_NAME, true, false);
+        return new FanoutExchange(RabbitMqConstants.FULL_UPDATE_TTL_EXCHANGE_NAME, true, false);
     }
 
     // 声明队列
@@ -48,24 +40,24 @@ public class SearchUpdateRabbitMqConfig {
     @Bean
     public Queue dataUpdateQueue() {
         Map<String, Object> map = new HashMap<>(2);
-        map.put("x-max-length", WAITING_MAX_LENGTH);
-        return new Queue(DATA_UPDATE_QUEUE_NAME, true, false, false, map);
+        map.put("x-max-length", RabbitMqConstants.DATA_UPDATE_WAITING_MAX_LENGTH);
+        return new Queue(RabbitMqConstants.DATA_UPDATE_QUEUE_NAME, true, false, false, map);
     }
 
     @Bean
     public Queue fullUpdateTTLQueue() {
         Map<String, Object> map = new HashMap<>(5);
-        map.put("x-message-ttl", TTL_MILLISECOND);
-        map.put("x-dead-letter-exchange", FULL_UPDATE_DEAD_EXCHANGE_NAME);
-        map.put("x-max-length", WAITING_MAX_LENGTH);
-        return new Queue(FULL_UPDATE_TTL_QUEUE_NAME, true, false, false, map);
+        map.put("x-message-ttl", RabbitMqConstants.FULL_UPDATE_TTL_MILLISECOND);
+        map.put("x-dead-letter-exchange", RabbitMqConstants.FULL_UPDATE_DEAD_EXCHANGE_NAME);
+        map.put("x-max-length", RabbitMqConstants.DATA_UPDATE_WAITING_MAX_LENGTH);
+        return new Queue(RabbitMqConstants.FULL_UPDATE_TTL_QUEUE_NAME, true, false, false, map);
     }
 
     @Bean
     public Queue fullUpdateDeadQueue() {
         Map<String, Object> map = new HashMap<>(2);
-        map.put("x-max-length", FULL_UPDATE_WAITING_MAX_LENGTH);
-        return new Queue(FULL_UPDATE_DEAD_QUEUE_NAME, true, false, false, map);
+        map.put("x-max-length", RabbitMqConstants.FULL_UPDATE_WAITING_MAX_LENGTH);
+        return new Queue(RabbitMqConstants.FULL_UPDATE_DEAD_QUEUE_NAME, true, false, false, map);
     }
 
 

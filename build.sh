@@ -21,6 +21,8 @@ if [ $? -eq 0 ]; then
   docker build -t "${DOCKER_NAMESPACE_HEAD_STR}fic-kanban:${DOCKER_IMAGE_NAME}" .
   cd ../fic-search
   docker build -t "${DOCKER_NAMESPACE_HEAD_STR}fic-search:${DOCKER_IMAGE_NAME}" .
+  cd ../fic-mail
+  docker build -t "${DOCKER_NAMESPACE_HEAD_STR}fic-mail:${DOCKER_IMAGE_NAME}" .
 else
     echo "Docker not installed"
 fi

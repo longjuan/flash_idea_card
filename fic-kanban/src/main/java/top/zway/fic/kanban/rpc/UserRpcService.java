@@ -11,11 +11,11 @@ import java.util.HashMap;
 /**
  * @author ZZJ
  */
-@FeignClient("fic-user")
+@FeignClient(name = "fic-user", contextId = "userRpcService", fallback = UserRpcServiceFallback.class)
 public interface UserRpcService {
     @PostMapping("/rpc/userinfo/list")
-    public R<HashMap<Long, UserInfoDO>> getUserInfoDoByList(@RequestParam("userIds") Long[] userIds);
+    R<HashMap<Long, UserInfoDO>> getUserInfoDoByList(@RequestParam("userIds") Long[] userIds);
 
     @PostMapping("/rpc/userinfo/id")
-    public R<HashMap<String, Long>> getUserIdByUsername(@RequestParam("email") String[] email);
+    R<HashMap<String, Long>> getUserIdByUsername(@RequestParam("email") String[] email);
 }

@@ -1,5 +1,6 @@
 package top.zway.fic.auth.config;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +26,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
                 // 放行公钥接口
                 .antMatchers("/rsa/publicKey").permitAll()
-                .anyRequest().authenticated();
+                .antMatchers("/oauth/rsa").permitAll()
+                .antMatchers("/rpc/rsa/decrypt").permitAll()
+                .antMatchers("/rpc/recaptcha/verify").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .csrf().disable();
     }
 
     @Bean
@@ -40,6 +46,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
 }
