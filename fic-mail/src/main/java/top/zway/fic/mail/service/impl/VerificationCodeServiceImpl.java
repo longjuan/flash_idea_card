@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 import top.zway.fic.base.constant.RabbitMqConstants;
 import top.zway.fic.base.constant.RedisConstant;
 import top.zway.fic.base.entity.bo.MailMessageBO;
@@ -16,9 +16,8 @@ import top.zway.fic.mail.service.VerificationCodeService;
 import top.zway.fic.redis.util.RedisUtils;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.Objects;
@@ -44,9 +43,9 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("000000");
 
     @PostConstruct
-    public void init() throws FileNotFoundException {
-        File file = ResourceUtils.getFile("classpath:email_template/verification_code.html");
-        VERIFICATION_CODE_MAIL_TEMPLATE = IoUtil.read(new FileReader(file));
+    public void init() throws IOException {
+        ClassPathResource resource = new ClassPathResource("email_template/verification_code.html");
+        VERIFICATION_CODE_MAIL_TEMPLATE = IoUtil.read(resource.getInputStream(), StandardCharsets.UTF_8);
     }
 
     @Override
