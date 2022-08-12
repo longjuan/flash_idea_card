@@ -6,11 +6,13 @@
 
 前端：https://github.com/longjuan/flash_idea_card_ui
 
-![image-20220404193613984](doc/1.png)
+![](doc/1.png)
 
-![image-20220404193639789](doc/2.png)
+![](doc/2.png)
 
-![image-20220404194022449](doc/3.png)
+![](doc/3.png)
+
+![](doc/4.png)
 
 # 技术栈
 
@@ -28,9 +30,10 @@
 ├── fic-common
 │   ├── fic-common-base # 基础依赖
 │   ├── fic-common-redis # redis基础依赖
-│   ├── fic-common-web # web基础依赖
+│   └── fic-common-web # web基础依赖
 ├── fic-gateway # 网关
 ├── fic-kanban # 看板模块
+├── fic-mail # 邮件模块
 ├── fic-search # 搜索模块
 └── fic-user # 用户模块
 ```
@@ -39,3 +42,5 @@
 
 在每个`resources`文件夹下的`fic-xxx-dev.yaml.nacos.example`
 
+# SQL文件
+`./sql`文件夹下

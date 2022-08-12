@@ -1,15 +1,15 @@
 spring:
   redis:
-    database: #
-    port: #
-    host: #
-    password: #
+    database: # redis数据库编号
+    port: # redis端口
+    host: # redis 地址
+    password: # redis 密码
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: # jdbc:mysql://localhost:3306/fic_user?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
-    username: #
-    password: #
+    url: # jdbc:mysql://fic-mysql-dns.fic:3306/fic_user?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: # mysql账号
+    password: # mysql密码
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -18,3 +18,6 @@ mybatis:
     map-underscore-to-camel-case: true
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: top.zway.fic.base.entity
+reCaptcha:
+  client:
+    secret: # reCaptcha服务端密钥
