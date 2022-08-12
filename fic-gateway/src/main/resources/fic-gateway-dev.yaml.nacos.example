@@ -25,22 +25,28 @@ spring:
           uri: lb://fic-search
           predicates:
             - Path=/search/**
+        - id: fic-mail
+          uri: lb://fic-mail
+          predicates:
+            - Path=/mail/**
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: # 'http://localhost:4011/rsa/publicKey'
+          jwk-set-uri: # 'http://fic-auth.fic:4011/rsa/publicKey'
   redis:
-    database: #
-    port: #
-    host: #
-    password: #
+    database: # redis数据库编号
+    port: # redis端口
+    host: # redis 地址
+    password: # redis 密码
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
 secure:
   ignore:
-    urls: #配置白名单路径
+    urls:
       - "/actuator/**"
-      - "/oauth/token"
+      - "/oauth/**"
       - "/user/register"
+      - "/mail/verification-code/**"
+      - "/user/password/reset"
